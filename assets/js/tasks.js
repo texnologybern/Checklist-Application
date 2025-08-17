@@ -258,4 +258,13 @@ export function init(){
       hide();
     };
   });
+
+  const notesToggle = el('#notesToggle');
+  const notesSection = el('#notesSection');
+  if (notesToggle && notesSection){
+    notesToggle.addEventListener('click', () => {
+      notesSection.classList.toggle('hidden');
+      notesToggle.textContent = notesSection.classList.contains('hidden') ? '⮟' : '⮝';
+    });
+  }
 }

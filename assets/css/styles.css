@@ -24,13 +24,9 @@ button:active{transform:translateY(1px)}
 .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .25s ease}
 .sectionTitle{padding:14px 28px 6px 28px;font-weight:800;color:#111827;letter-spacing:.2px}
 
-/* Merged notes header + summary */
+/* Notes header + summary */
 .notesSummary,
-.notesHeader{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
+.notesHeader{ display:flex; align-items:center; justify-content:space-between; }
 .notesSummary{cursor:pointer;}
 .notesSummary::-webkit-details-marker{display:none;}
 .notesSummary::marker{content:"";}
@@ -40,7 +36,8 @@ button:active{transform:translateY(1px)}
 
 /* Add form (responsive) */
 .addForm{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;padding:0 28px 12px}
-.addForm input,.addForm textarea{border:1px solid var(--border);border-radius:12px;padding:10px;min-width:0;width:100%}
+.addForm input,.addForm textarea,.addForm select{border:1px solid var(--border);border-radius:12px;padding:10px;min-width:0;width:100%}
+.addForm select{-webkit-appearance:none;appearance:none;padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23677389' d='M5 6L0 0h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:10px}
 .addForm .dateInputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
 .addForm .dateInputs input{ text-align:center; }
 
@@ -74,13 +71,16 @@ footer{padding:14px 28px 28px 28px;color:var(--muted);font-size:12px}
   .notesWrap{grid-template-columns:1fr;padding:0 12px 28px}
   .filters{grid-template-columns:1fr;padding:0 12px 12px}
   .addForm{grid-template-columns:1fr;padding:0 12px 12px}
-  .task{grid-template-columns:26px minmax(0,1fr) auto;gap:8px;padding:10px}
-  .task.editing{grid-template-columns:26px 28px minmax(0,1fr)}
+  .task{grid-template-columns:26px 28px minmax(0,1fr) auto;gap:8px;padding:10px}
+  .task.editing{grid-template-columns:1fr;}
+  .task.editing .handle,
+  .task.editing > input[type="checkbox"]{ display:none; }
 }
 
 /* Desktop wide */
 @media (min-width:1024px){
   .page{max-width:1100px}
+  .filters, .addForm{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
 }
 
 /* Print */
@@ -99,7 +99,9 @@ footer{padding:14px 28px 28px 28px;color:var(--muted);font-size:12px}
 
 /* Filters bar (responsive) */
 .filters{padding:0 28px 12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
-.filters input,.filters select{border:1px solid var(--border);border-radius:12px;padding:10px;background:#fff;width:100%;min-width:0}
+.filters input:not([type="checkbox"]),.filters select{border:1px solid var(--border);border-radius:12px;padding:10px;background:#fff;width:100%;min-width:0}
+.filters select{-webkit-appearance:none;appearance:none;padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23677389' d='M5 6L0 0h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:10px}
+.filters .onlyPending input{width:auto;transform:scale(1.2);accent-color:var(--accent2)}
 .filters .onlyPending{display:flex;align-items:center;gap:8px;min-width:0}
 
 /* Drag handle */
@@ -171,14 +173,17 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 .actions .edit:hover{ background:#e5e7eb; }
 
 /* Editing state */
-.task.editing{ grid-template-columns:26px 28px minmax(0,1fr); }
+.task.editing{ grid-template-columns:1fr; }
 .task.editing .actions{ display:none; }
+.task.editing .handle,
+.task.editing > input[type="checkbox"]{ display:none; }
 
 /* Edit form */
 .hidden{ display:none !important; }
 .editForm{ border:1px dashed var(--border); background:#fbfdff; padding:10px; border-radius:12px; margin-top:6px; }
 .editForm .row{ display:grid; grid-template-columns:1fr; gap:8px; }
 .editForm input, .editForm textarea, .editForm select{ border:1px solid var(--border); border-radius:10px; padding:10px; width:100%; }
+.editForm select{-webkit-appearance:none;appearance:none;padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23677389' d='M5 6L0 0h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:10px}
 .editForm .dateInputs{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 .editForm .dateInputs input{ text-align:center; }
 .editBtns{ display:flex; gap:8px; justify-content:flex-end; }

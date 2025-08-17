@@ -83,13 +83,15 @@
       <div class="sectionTitle">Εργασίες</div>
       <ul class="tasks" id="taskList"></ul>
 
-      <details id="notesPanel">
-        <summary class="sectionTitle notesSummary">Συνολικές Σημειώσεις</summary>
-        <div class="notesWrap">
-          <textarea id="notes" placeholder="Γενικές παρατηρήσεις, ημερολόγιο εργασιών, εκκρεμότητες."></textarea>
-          <textarea id="materials" placeholder="Υλικά προς αγορά / παραγγελίες."></textarea>
-        </div>
-      </details>
+      <!-- ✅ Notes section from main -->
+      <div class="sectionTitle notesHeader">
+        <span>Συνολικές Σημειώσεις</span>
+        <button id="notesToggle" aria-expanded="false">⮟</button>
+      </div>
+      <div class="notesWrap hidden" id="notesSection">
+        <textarea id="notes" placeholder="Γενικές παρατηρήσεις, ημερολόγιο εργασιών, εκκρεμότητες."></textarea>
+        <textarea id="materials" placeholder="Υλικά προς αγορά / παραγγελίες."></textarea>
+      </div>
 
       <footer>
         Συμβουλή: Κάντε κλικ στο «Εκτύπωση / PDF» για να αποθηκεύσετε την τρέχουσα κατάσταση ως PDF.

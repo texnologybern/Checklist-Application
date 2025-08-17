@@ -38,6 +38,15 @@ function renderChips(tags){
   return '<div class="chips">' + parts.map(t => `<span class="chip">${escapeHtml(t)}</span>`).join('') + '</div>';
 }
 
+/* ΝΕΟ: Μορφοποίηση & εμφάνιση ημερομηνιών */
+const fmtDate = d => new Date(d).toLocaleDateString('el-GR', { day:'2-digit', month:'2-digit' });
+function renderDates(start, due){
+  if (start && due) return `<div class="dates">📅 <span class="start">${escapeHtml(fmtDate(start))}</span> → <span class="due">${escapeHtml(fmtDate(due))}</span></div>`;
+  if (start)       return `<div class="dates">📅 Από <span class="start">${escapeHtml(fmtDate(start))}</span></div>`;
+  if (due)         return `<div class="dates">📅 Μέχρι <span class="due">${escapeHtml(fmtDate(due))}</span></div>`;
+  return '';
+}
+
 function taskItem(t){
   const li = document.createElement('li');
   li.className = 'task';
@@ -49,9 +58,7 @@ function taskItem(t){
   li.draggable = true;
   if (t.checked) li.classList.add('done');
 
-  const datesLine = (t.start_date || t.due_date)
-    ? `<div class="dates">${t.start_date ? `<span class="start" title="Ημερομηνία έναρξης">Έναρξη ${escapeHtml(t.start_date)}</span>` : ''}${t.start_date && t.due_date ? ' – ' : ''}${t.due_date ? `<span class="due" title="Διορία">Διορία ${escapeHtml(t.due_date)}</span>` : ''}</div>`
-    : '';
+  const datesLine = renderDates(t.start_date, t.due_date);
 
   li.innerHTML = `
     <div class="handle" title="Μετακίνηση">≡</div>
@@ -84,8 +91,8 @@ function taskItem(t){
             </select>
           </div>
           <div class="dateInputs">
-            <input class="editStart" type="date" value="${escapeAttr(t.start_date || '')}" placeholder="Έναρξη" title="Ημερομηνία έναρξης">
-            <input class="editDue" type="date" value="${escapeAttr(t.due_date || '')}" placeholder="Διορία" title="Διορία">
+            <input class="editStart" type="date" value="${escapeAttr(t.start_date || '')}" placeholder="Από" title="Ημερομηνία αρχής">
+            <input class="editDue" type="date"   value="${escapeAttr(t.due_date   || '')}" placeholder="Μέχρι" title="Ημερομηνία λήξης">
           </div>
           <div class="editBtns">
             <button class="saveEdit success">Αποθήκευση</button>
@@ -138,24 +145,22 @@ function taskItem(t){
     const tags = el('.editTags', li).value.trim();
     const priority = Number(el('.editPriority', li).value || 2);
     const start_date = el('.editStart', li).value;
-    const due_date = el('.editDue', li).value;
+    const due_date   = el('.editDue', li).value;
     try {
       await API('update_task', { id: t.id, title, description, tags, priority, start_date, due_date });
       // update UI
       el('.titleText', li).textContent = title;
       el('.desc', li).textContent = description;
-      li.dataset.priority = String(priority);
-      li.dataset.tags = tags.toLowerCase();
+      li.dataset.priority   = String(priority);
+      li.dataset.tags       = tags.toLowerCase();
       li.dataset.start_date = start_date || '';
-      li.dataset.due_date = due_date || '';
+      li.dataset.due_date   = due_date   || '';
       const oldBadge = el('.titleRow .badge', li); if (oldBadge) oldBadge.remove();
       el('.titleRow', li).insertAdjacentElement('beforeend', prioBadge(priority));
       const oldChips = el('.chips', li); if (oldChips) oldChips.remove();
       el('.desc', li).insertAdjacentHTML('afterend', renderChips(tags));
       const oldDates = el('.dates', li); if (oldDates) oldDates.remove();
-      const datesLine = (start_date || due_date)
-        ? `<div class="dates">${start_date ? `<span class="start" title="Ημερομηνία έναρξης">Έναρξη ${escapeHtml(start_date)}</span>` : ''}${start_date && due_date ? ' – ' : ''}${due_date ? `<span class="due" title="Διορία">Διορία ${escapeHtml(due_date)}</span>` : ''}</div>`
-        : '';
+      const datesLine = renderDates(start_date, due_date);
       el('.desc', li).insertAdjacentHTML('afterend', datesLine);
       el('.cancelEdit', li).click();
       applyFilters();
@@ -294,7 +299,7 @@ el('#addBtn')?.addEventListener('click', async () => {
   const priority = Number(el('#addPriority')?.value || 2);
   const tags = el('#addTags')?.value.trim() || '';
   const start_date = el('#addStart')?.value || '';
-  const due_date = el('#addDue')?.value || '';
+  const due_date   = el('#addDue')?.value || '';
   if (!title) { alert('Συμπληρώστε τίτλο'); return; }
   try {
     const { task } = await API('add', { title, description, priority, tags, start_date, due_date });
@@ -308,16 +313,6 @@ el('#addBtn')?.addEventListener('click', async () => {
     refreshProgress();
     applyFilters();
   } catch (err) { alert(err.message); }
-});
-
-el('#printBtn')?.addEventListener('click', () => {
-  const url = new URL('print.php', window.location.href);
-  url.searchParams.set('list_id', LIST_ID);
-  window.open(url.toString(), '_blank');
-});
-el('#resetBtn')?.addEventListener('click', async () => {
-  if (!confirm('Σίγουρα θέλετε να καθαρίσετε όλες τις επιλογές; (Η εργασία #4 θα παραμείνει ολοκληρωμένη)')) return;
-  try { await API('reset', {}); await load(); } catch (err) { alert(err.message); }
 });
 
 /* ==== Filters ==== */
@@ -340,6 +335,7 @@ function applyFilters(){
     const tags  = (li.dataset.tags || '');
     const prio  = (li.dataset.priority || '');
     const done  = li.querySelector('input[type="checkbox"]').checked;
+    const start = li.dataset.start_date || '';
     const due   = li.dataset.due_date || '';
 
     let ok = true;
@@ -347,8 +343,19 @@ function applyFilters(){
     if (tg && !tags.split(',').map(s=>s.trim()).filter(Boolean).some(x => x.includes(tg))) ok = false;
     if (pr && pr !== prio) ok = false;
     if (onlyPending && done) ok = false;
-    if (from && (!due || due < from)) ok = false;
-    if (to && (!due || due > to)) ok = false;
+
+    // Νέα λογική φίλτρων με εύρος ημερομηνιών
+    if (from || to){
+      const inRange = d => (!from || d >= from) && (!to || d <= to);
+      const hasStart = !!start, hasDue = !!due;
+
+      const startOk = hasStart && inRange(start);
+      const dueOk   = hasDue && inRange(due);
+      // range overlap: [start, due] intersects [from, to]
+      const rangeOk = hasStart && hasDue && (!from || due >= from) && (!to || start <= to);
+
+      if (!(startOk || dueOk || rangeOk)) ok = false;
+    }
 
     li.style.display = ok ? '' : 'none';
   });

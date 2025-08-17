@@ -51,14 +51,14 @@
           <option value="2">Μεσαία</option>
           <option value="3">Χαμηλή</option>
         </select>
-        <input type="date" id="filterFrom" title="Από">
-        <input type="date" id="filterTo" title="Έως">
+        <input type="date" id="filterFrom" title="Από" placeholder="Από">
+        <input type="date" id="filterTo" title="Μέχρι" placeholder="Μέχρι">
         <select id="sortDate">
           <option value="">Ταξινόμηση: Καμία</option>
-          <option value="start_asc">Έναρξη ↑</option>
-          <option value="start_desc">Έναρξη ↓</option>
-          <option value="due_asc">Λήξη ↑</option>
-          <option value="due_desc">Λήξη ↓</option>
+          <option value="start_asc">Από ↑</option>
+          <option value="start_desc">Από ↓</option>
+          <option value="due_asc">Μέχρι ↑</option>
+          <option value="due_desc">Μέχρι ↓</option>
         </select>
         <label class="onlyPending"><input type="checkbox" id="filterPending"> Μόνο εκκρεμή</label>
       </div>
@@ -74,8 +74,8 @@
         </select>
         <input id="addTags" placeholder="Ετικέτες (π.χ. Ηλεκτρικά,Μπάνιο)">
         <div class="dateInputs">
-          <input id="addStart" type="date" placeholder="Έναρξη" title="Ημερομηνία έναρξης">
-          <input id="addDue" type="date" placeholder="Διορία" title="Διορία">
+          <input id="addStart" type="date" placeholder="Από" title="Ημερομηνία αρχής">
+          <input id="addDue" type="date" placeholder="Μέχρι" title="Ημερομηνία λήξης">
         </div>
         <button class="success" id="addBtn">+ Προσθήκη</button>
       </div>

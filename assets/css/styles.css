@@ -25,6 +25,7 @@ button:active{transform:translateY(1px)}
 .addForm{display:grid;grid-template-columns:1.2fr 2fr auto;gap:10px;padding:0 28px 12px}
 .addForm input,.addForm textarea{border:1px solid var(--border);border-radius:12px;padding:10px}
 .addForm .dateInputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.addForm .dateInputs input{ text-align:center; }
 ul.tasks{list-style:none;margin:0;padding:8px 18px 24px 18px;display:grid;gap:10px}
 .task{border:1px solid var(--border);border-radius:16px;padding:12px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;background:#fff}
 .task input[type="checkbox"]{margin-top:4px;transform:scale(1.35);accent-color:var(--accent2);cursor:pointer}
@@ -64,7 +65,6 @@ footer{padding:14px 28px 28px 28px;color:var(--muted);font-size:12px}
   .task{box-shadow:none;border:1px solid #d1d5db;border-radius:8px;padding:6px;background:transparent}
   .task .handle,.task .actions{display:none}
   .task input[type="checkbox"]{transform:none;margin-top:0}
-
 }
 /* Filters bar */
 .filters{padding:0 28px 12px;display:grid;grid-template-columns:2fr 1.4fr 1.2fr auto;gap:10px}
@@ -81,6 +81,7 @@ footer{padding:14px 28px 28px 28px;color:var(--muted);font-size:12px}
 /* Drag handle */
 .handle{cursor:grab;user-select:none;font-size:18px;line-height:1;padding:4px 6px}
 .task.dragging{opacity:.6}
+
 /* ===== Task Card Redesign ===== */
 ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 
@@ -152,6 +153,7 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 .editForm .row{ display:grid; grid-template-columns:1fr; gap:8px; }
 .editForm input, .editForm textarea, .editForm select{ border:1px solid var(--border); border-radius:10px; padding:10px; width:100%; }
 .editForm .dateInputs{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.editForm .dateInputs input{ text-align:center; }
 .editBtns{ display:flex; gap:8px; justify-content:flex-end; }
 
 /* Notes thread */
@@ -163,7 +165,6 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 .notesThread{ margin-top:6px; border-left:3px solid #e5e7eb; padding-left:10px; display:grid; gap:6px; }
 .noteItem{ background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:8px 10px; }
 .noteMeta{ font-size:11px; color:#64748b; margin-top:2px; }
-
 
 .noteItem .noteRow{
   display:flex; gap:8px; align-items:flex-start; justify-content:space-between;
@@ -179,4 +180,3 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 .noteDel:hover{
   background:#fee2e2; border-color:#fecaca; color:#991b1b;
 }
-

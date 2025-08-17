@@ -44,8 +44,14 @@ function taskItem(t){
   li.dataset.id = t.id;
   li.dataset.priority = t.priority || 2;
   li.dataset.tags = (t.tags || '').toLowerCase();
+  li.dataset.start_date = t.start_date || '';
+  li.dataset.due_date   = t.due_date || '';
   li.draggable = true;
   if (t.checked) li.classList.add('done');
+
+  const datesLine = (t.start_date || t.due_date)
+    ? `<div class="dates">${t.start_date ? `<span class=\"start\">${escapeHtml(t.start_date)}</span>` : ''}${t.start_date && t.due_date ? ' – ' : ''}${t.due_date ? `<span class=\"due\">${escapeHtml(t.due_date)}</span>` : ''}</div>`
+    : '';
 
   li.innerHTML = `
     <div class="handle" title="Μετακίνηση">≡</div>
@@ -56,6 +62,7 @@ function taskItem(t){
         ${prioBadge(t.priority).outerHTML}
       </div>
       <div class="desc">${escapeHtml(t.description || '')}</div>
+      ${datesLine}
       ${renderChips(t.tags)}
 
       <div class="addNote">
@@ -75,6 +82,10 @@ function taskItem(t){
               <option value="2" ${!t.priority||t.priority==2?'selected':''}>Μεσαία</option>
               <option value="3" ${t.priority==3?'selected':''}>Χαμηλή</option>
             </select>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <input class="editStart" type="date" value="${escapeAttr(t.start_date || '')}" placeholder="Έναρξη">
+            <input class="editDue" type="date" value="${escapeAttr(t.due_date || '')}" placeholder="Λήξη">
           </div>
           <div class="editBtns">
             <button class="saveEdit success">Αποθήκευση</button>
@@ -126,18 +137,28 @@ function taskItem(t){
     const description = el('.editDesc', li).value.trim();
     const tags = el('.editTags', li).value.trim();
     const priority = Number(el('.editPriority', li).value || 2);
+    const start_date = el('.editStart', li).value;
+    const due_date = el('.editDue', li).value;
     try {
-      await API('update_task', { id: t.id, title, description, tags, priority });
+      await API('update_task', { id: t.id, title, description, tags, priority, start_date, due_date });
       // update UI
       el('.titleText', li).textContent = title;
       el('.desc', li).textContent = description;
       li.dataset.priority = String(priority);
       li.dataset.tags = tags.toLowerCase();
+      li.dataset.start_date = start_date || '';
+      li.dataset.due_date = due_date || '';
       const oldBadge = el('.titleRow .badge', li); if (oldBadge) oldBadge.remove();
       el('.titleRow', li).insertAdjacentElement('beforeend', prioBadge(priority));
       const oldChips = el('.chips', li); if (oldChips) oldChips.remove();
       el('.desc', li).insertAdjacentHTML('afterend', renderChips(tags));
+      const oldDates = el('.dates', li); if (oldDates) oldDates.remove();
+      const datesLine = (start_date || due_date)
+        ? `<div class="dates">${start_date ? `<span class=\"start\">${escapeHtml(start_date)}</span>` : ''}${start_date && due_date ? ' – ' : ''}${due_date ? `<span class=\"due\">${escapeHtml(due_date)}</span>` : ''}</div>`
+        : '';
+      el('.desc', li).insertAdjacentHTML('afterend', datesLine);
       el('.cancelEdit', li).click();
+      applyFilters();
     } catch (err) { alert(err.message); }
   });
 
@@ -273,14 +294,18 @@ el('#addBtn')?.addEventListener('click', async () => {
   const description = el('#addDesc').value.trim();
   const priority = Number(el('#addPriority')?.value || 2);
   const tags = el('#addTags')?.value.trim() || '';
+  const start_date = el('#addStart')?.value || '';
+  const due_date = el('#addDue')?.value || '';
   if (!title) { alert('Συμπληρώστε τίτλο'); return; }
   try {
-    const { task } = await API('add', { title, description, priority, tags });
+    const { task } = await API('add', { title, description, priority, tags, start_date, due_date });
     el('#taskList').appendChild(taskItem(task));
     el('#addTitle').value = '';
     el('#addDesc').value = '';
     if (el('#addTags')) el('#addTags').value = '';
     if (el('#addPriority')) el('#addPriority').value = '2';
+    if (el('#addStart')) el('#addStart').value = '';
+    if (el('#addDue')) el('#addDue').value = '';
     refreshProgress();
     applyFilters();
   } catch (err) { alert(err.message); }
@@ -297,7 +322,7 @@ el('#resetBtn')?.addEventListener('click', async () => {
 });
 
 /* ==== Filters ==== */
-['#filterSearch','#filterTag','#filterPriority','#filterPending'].forEach(sel=>{
+['#filterSearch','#filterTag','#filterPriority','#filterPending','#filterFrom','#filterTo','#sortDate'].forEach(sel=>{
   el(sel)?.addEventListener('input', applyFilters);
   el(sel)?.addEventListener('change', applyFilters);
 });
@@ -306,6 +331,9 @@ function applyFilters(){
   const tg = (el('#filterTag')?.value || '').toLowerCase();
   const pr = (el('#filterPriority')?.value || '');
   const onlyPending = !!el('#filterPending')?.checked;
+  const from = el('#filterFrom')?.value || '';
+  const to   = el('#filterTo')?.value || '';
+  const sort = el('#sortDate')?.value || '';
 
   els('.task').forEach(li=>{
     const title = (li.querySelector('label')?.textContent || '').toLowerCase();
@@ -313,15 +341,35 @@ function applyFilters(){
     const tags  = (li.dataset.tags || '');
     const prio  = (li.dataset.priority || '');
     const done  = li.querySelector('input[type="checkbox"]').checked;
+    const due   = li.dataset.due_date || '';
 
     let ok = true;
     if (q && !(title.includes(q) || desc.includes(q))) ok = false;
     if (tg && !tags.split(',').map(s=>s.trim()).filter(Boolean).some(x => x.includes(tg))) ok = false;
     if (pr && pr !== prio) ok = false;
     if (onlyPending && done) ok = false;
+    if (from && (!due || due < from)) ok = false;
+    if (to && (!due || due > to)) ok = false;
 
     li.style.display = ok ? '' : 'none';
   });
+  sortTasks(sort);
+}
+
+function sortTasks(order){
+  const list = el('#taskList');
+  const items = els('.task').filter(li => li.style.display !== 'none');
+  const get = (li, key) => li.dataset[key] || '';
+  items.sort((a,b)=>{
+    switch(order){
+      case 'start_asc': return get(a,'start_date').localeCompare(get(b,'start_date'));
+      case 'start_desc': return get(b,'start_date').localeCompare(get(a,'start_date'));
+      case 'due_asc': return get(a,'due_date').localeCompare(get(b,'due_date'));
+      case 'due_desc': return get(b,'due_date').localeCompare(get(a,'due_date'));
+      default: return 0;
+    }
+  });
+  items.forEach(li => list.appendChild(li));
 }
 
 /* ==== Drag & Drop reorder ==== */
@@ -346,8 +394,13 @@ function getDragAfterElement(container, y){
   }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 async function sendOrder(){
-  const ids = els('.task').map(li => Number(li.dataset.id));
-  try { await API('reorder', { ids }); }
+  const items = els('.task');
+  const ids = items.map(li => Number(li.dataset.id));
+  const dates = {};
+  items.forEach(li => {
+    dates[li.dataset.id] = { start_date: li.dataset.start_date || null, due_date: li.dataset.due_date || null };
+  });
+  try { await API('reorder', { ids, dates }); }
   catch (err) { alert(err.message); }
 }
 

@@ -20,9 +20,12 @@
           <div class="subtitle">Συντήρηση & αναβαθμίσεις κατοικίας. Επιλέξτε τα κουτάκια για να σημειώσετε ό,τι ολοκληρώθηκε.</div>
         </div>
         <div class="toolbar">
-          <button class="primary" id="printBtn">🖨️ Εκτύπωση / PDF</button>
-          <button id="resetBtn">↺ Επαναφορά επιλογών</button>
-          <button class="success" id="saveBtn">💾 Αποθήκευση τώρα</button>
+          <button class="menuBtn" id="menuBtn">☰</button>
+          <div class="toolbarButtons">
+            <button class="primary" id="printBtn">🖨️ Εκτύπωση / PDF</button>
+            <button id="resetBtn">↺ Επαναφορά επιλογών</button>
+            <button class="success" id="saveBtn">💾 Αποθήκευση τώρα</button>
+          </div>
         </div>
       </header>
 

@@ -95,7 +95,7 @@
     </div>
   </div>
 
-  <script src="assets/js/app.js"></script>
+  <script type="module" src="assets/js/main.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('assets/sw.js').catch(console.error);

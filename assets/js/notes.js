@@ -18,9 +18,10 @@ function renderNoteItem(n){
 }
 
 export function initNotes(li, task){
-  const thread = el('.notesThread', li);
-  const wrapper = el('.taskNotes', li);
-  const noteInput = el('.noteText', li);
+  const thread  = el('.notesThread', li);
+  const wrapper = el('.taskNotes', li);      // <details>
+  const noteInput = el('.noteText', li);     // ✅ Codex change
+
   const ensureLoaded = async () => {
     if (thread.dataset.loaded === '1') return;
     try {
@@ -31,7 +32,11 @@ export function initNotes(li, task){
       console.warn(err.message);
     }
   };
+
+  // Lazy load όταν εστιάζει το input
   noteInput?.addEventListener('focus', ensureLoaded);
+
+  // Όταν ανοίγει το <details>, φόρτωσε & εστίασε στο input
   wrapper?.addEventListener('toggle', () => {
     if (wrapper.open){
       ensureLoaded();
@@ -69,6 +74,7 @@ export function initNotes(li, task){
       alert(err.message);
     }
   };
+
   el('.noteText', li).addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); addNote(); }
   });

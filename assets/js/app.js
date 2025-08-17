@@ -348,4 +348,13 @@ async function sendOrder(){
 }
 
 /* ==== kick off ==== */
-document.addEventListener('DOMContentLoaded', load);
+document.addEventListener('DOMContentLoaded', () => {
+  load();
+  const menuBtn = el('#menuBtn');
+  const toolbar = el('.toolbar');
+  if (menuBtn && toolbar) {
+    menuBtn.addEventListener('click', () => {
+      toolbar.classList.toggle('open');
+    });
+  }
+});

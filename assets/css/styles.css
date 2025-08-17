@@ -38,21 +38,25 @@ button:active{transform:translateY(1px)}
 #notesPanel[open] .notesSummary::after{content:'▲';}
 .notesHeader button{border:none;background:none;font-size:18px;cursor:pointer;line-height:1;padding:0;}
 
+/* Add form (responsive) */
 .addForm{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;padding:0 28px 12px}
-.addForm input,.addForm textarea{border:1px solid var(--border);border-radius:12px;padding:10px;min-width:0}
+.addForm input,.addForm textarea{border:1px solid var(--border);border-radius:12px;padding:10px;min-width:0;width:100%}
 .addForm .dateInputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
 .addForm .dateInputs input{ text-align:center; }
+
 ul.tasks{list-style:none;margin:0;padding:8px 18px 24px 18px;display:grid;gap:10px}
 .task{border:1px solid var(--border);border-radius:16px;padding:12px;display:grid;grid-template-columns:26px 28px minmax(0,1fr) auto;gap:12px;align-items:start;background:#fff}
 .task input[type="checkbox"]{margin-top:4px;transform:scale(1.35);accent-color:var(--accent2);cursor:pointer}
 .task label{font-weight:700;display:block}
-.desc{color:var(--muted);font-size:13px;margin-top:4px}
+.desc{color:var(--muted);font-size:13px;margin-top:4px;word-break:break-word;overflow-wrap:anywhere}
 .note{margin-top:10px;width:100%;border:1px solid var(--border);padding:10px 12px;border-radius:10px;font-size:13px;word-break:break-word;overflow-wrap:anywhere}
 .del{border:1px solid #fecaca;background:#fee2e2;color:#b91c1c}
 .badge{display:inline-block;font-size:11px;font-weight:700;color:#065f46;background:#d1fae5;border:1px solid #a7f3d0;padding:3px 8px;border-radius:999px;margin-left:6px}
 .notesWrap{padding:0 28px 28px 28px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .notesWrap textarea{width:100%;min-height:150px;border:1px solid var(--border);border-radius:12px;padding:12px;min-width:0}
 footer{padding:14px 28px 28px 28px;color:var(--muted);font-size:12px}
+
+/* Mobile */
 @media (max-width:768px){
   .meta{grid-template-columns:1fr 1fr}
   .addForm{grid-template-columns:1fr}
@@ -72,9 +76,13 @@ footer{padding:14px 28px 28px 28px;color:var(--muted);font-size:12px}
   .addForm{grid-template-columns:1fr;padding:0 12px 12px}
   .task{grid-template-columns:26px minmax(0,1fr) auto;gap:8px;padding:10px}
 }
+
+/* Desktop wide */
 @media (min-width:1024px){
   .page{max-width:1100px}
 }
+
+/* Print */
 @media print{
   body{background:#fff}
   .page{margin:0}
@@ -87,7 +95,8 @@ footer{padding:14px 28px 28px 28px;color:var(--muted);font-size:12px}
   .task .handle,.task .actions{display:none}
   .task input[type="checkbox"]{transform:none;margin-top:0}
 }
-/* Filters bar */
+
+/* Filters bar (responsive) */
 .filters{padding:0 28px 12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
 .filters input,.filters select{border:1px solid var(--border);border-radius:12px;padding:10px;background:#fff;width:100%;min-width:0}
 .filters .onlyPending{display:flex;align-items:center;gap:8px;min-width:0}
@@ -106,18 +115,18 @@ footer{padding:14px 28px 28px 28px;color:var(--muted);font-size:12px}
 /* ===== Task Card Redesign ===== */
 ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 
-  .task{
-    display: grid;
-    grid-template-columns: 26px 28px minmax(0,1fr) auto; /* handle | checkbox | content | actions */
-    align-items: center;
-    gap: 12px;
-    padding: 12px 12px;
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background-color .12s ease;
-  }
+.task{
+  display: grid;
+  grid-template-columns: 26px 28px minmax(0,1fr) auto; /* handle | checkbox | content | actions */
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background-color .12s ease;
+}
 .task:hover{ transform: translateY(-1px); border-color:#d1d5db; box-shadow: 0 10px 24px rgba(2,6,23,.10); }
 
 .task .handle{
@@ -132,8 +141,8 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 .task .content{ display: grid; row-gap: 6px; min-width:0; }
 .task .content .titleRow{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .task .content label{ font-weight: 800; font-size: 15px; display: inline; }
-.task .desc{ color:#64748b; font-size: 13px; margin: 0; }
-.task .note{ margin-top: 4px; font-size: 13px; }
+.task .desc{ color:#64748b; font-size: 13px; margin: 0; word-break:break-word; overflow-wrap:anywhere; }
+.task .note{ margin-top: 4px; font-size: 13px; word-break:break-word; overflow-wrap:anywhere; }
 
 .task .actions{ display:flex; align-items:center; justify-content:flex-end; align-self:flex-start; }
 .task .del{
@@ -142,7 +151,7 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 }
 .task .del:hover{ background:#fee2e2; border-color:#fecaca; color:#991b1b; }
 
-/* Badges & chips */
+/* Badges & chips (alt palette) */
 .badge{ font-size:11px; padding:3px 8px; border-radius: 999px; border:1px solid #e5e7eb; }
 .badge.p1{ background:#fee2e2; border-color:#fecaca; color:#991b1b; }
 .badge.p2{ background:#e2e8f0; border-color:#cbd5e1; color:#1f2937; }
@@ -186,7 +195,6 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 .taskNotes[open] summary::after{ content:'▲'; }
 .addNote{ margin-top:6px; display:flex; gap:8px; }
 
-/* Confirmation modal */
 .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;animation:fadeIn .25s;}
 .modal.hidden{display:none;}
 .modal .box{background:#fff;padding:20px;border-radius:12px;box-shadow:var(--shadow);text-align:center;animation:scaleIn .25s;}

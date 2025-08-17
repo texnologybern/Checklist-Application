@@ -20,8 +20,8 @@ button:active{transform:translateY(1px)}
 .progress{height:12px;background:#eef2ff;border:1px solid var(--border);border-radius:999px;overflow:hidden;position:relative}
 .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .25s ease}
 .sectionTitle{padding:14px 28px 6px 28px;font-weight:800;color:#111827;letter-spacing:.2px}
-.addForm{display:grid;grid-template-columns:1.2fr 2fr auto;gap:10px;padding:0 28px 12px}
-.addForm input,.addForm textarea{border:1px solid var(--border);border-radius:12px;padding:10px}
+.addForm{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr auto;gap:10px;padding:0 28px 12px}
+.addForm input,.addForm textarea,.addForm select{border:1px solid var(--border);border-radius:12px;padding:10px}
 ul.tasks{list-style:none;margin:0;padding:8px 18px 24px 18px;display:grid;gap:10px}
 .task{border:1px solid var(--border);border-radius:16px;padding:12px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;background:#fff}
 .task input[type="checkbox"]{margin-top:4px;transform:scale(1.35);accent-color:var(--accent2);cursor:pointer}
@@ -36,7 +36,7 @@ footer{padding:14px 28px 28px 28px;color:var(--muted);font-size:12px}
 @media (max-width:800px){.meta{grid-template-columns:1fr 1fr}.addForm{grid-template-columns:1fr}.notesWrap{grid-template-columns:1fr}}
 @media print{body{background:#fff}.page{margin:0}.toolbar{display:none}.card{box-shadow:none}button{display:none}}
 /* Filters bar */
-.filters{padding:0 28px 12px;display:grid;grid-template-columns:2fr 1.4fr 1.2fr auto;gap:10px}
+.filters{padding:0 28px 12px;display:grid;grid-template-columns:2fr 1.2fr 1.2fr 1.2fr auto;gap:10px}
 .filters input,.filters select{border:1px solid var(--border);border-radius:12px;padding:10px;background:#fff}
 .filters .onlyPending{display:flex;align-items:center;gap:8px}
 
@@ -46,6 +46,8 @@ footer{padding:14px 28px 28px 28px;color:var(--muted);font-size:12px}
 .badge.p1{background:#fee2e2;border-color:#fecaca;color:#991b1b} /* High */
 .badge.p2{background:#dbeafe;border-color:#bfdbfe;color:#1e3a8a} /* Medium */
 .badge.p3{background:#dcfce7;border-color:#bbf7d0;color:#14532d} /* Low */
+.catBadge{color:#fff}
+.deadlineBadge{background:#fef9c3;border-color:#fde68a;color:#92400e}
 
 /* Drag handle */
 .handle{cursor:grab;user-select:none;font-size:18px;line-height:1;padding:4px 6px}

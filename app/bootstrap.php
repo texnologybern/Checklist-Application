@@ -25,6 +25,8 @@ function ensure_migrated(): void {
   ensure_task_enhancements($pdo);
   // 004 notes table
   ensure_task_notes($pdo);
+  // 005 - start/due dates
+  ensure_task_dates($pdo);
 }
 
 function ensure_task_notes(PDO $pdo): void {
@@ -54,6 +56,13 @@ function ensure_task_enhancements(PDO $pdo): void {
   catch (Throwable $e) { $pdo->exec("ALTER TABLE tasks ADD COLUMN priority TINYINT NOT NULL DEFAULT 2 AFTER position"); }
   try { $pdo->query('SELECT tags FROM tasks LIMIT 1'); }
   catch (Throwable $e) { $pdo->exec("ALTER TABLE tasks ADD COLUMN tags VARCHAR(255) NULL AFTER priority"); }
+}
+
+function ensure_task_dates(PDO $pdo): void {
+  try { $pdo->query('SELECT start_date FROM tasks LIMIT 1'); }
+  catch (Throwable $e) { $pdo->exec("ALTER TABLE tasks ADD COLUMN start_date DATE NULL AFTER tags"); }
+  try { $pdo->query('SELECT due_date FROM tasks LIMIT 1'); }
+  catch (Throwable $e) { $pdo->exec("ALTER TABLE tasks ADD COLUMN due_date DATE NULL AFTER start_date"); }
 }
 
 function csrf_token(): string {

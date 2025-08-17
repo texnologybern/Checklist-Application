@@ -44,6 +44,8 @@ try {
   $hasPriority = col_exists($pdo, 'tasks', 'priority');
   $hasTags     = col_exists($pdo, 'tasks', 'tags');
   $hasNotesTbl = table_exists($pdo, 'task_notes');
+  $hasStart    = col_exists($pdo, 'tasks', 'start_date');
+  $hasDue      = col_exists($pdo, 'tasks', 'due_date');
 
   switch ($action) {
 
@@ -54,6 +56,8 @@ try {
       $sel = 'SELECT id,title,description,note,checked,position';
       $sel .= $hasPriority ? ',priority' : ',2 AS priority';
       $sel .= $hasTags     ? ',tags'     : ",'' AS tags";
+      $sel .= $hasStart    ? ',start_date' : ',NULL AS start_date';
+      $sel .= $hasDue      ? ',due_date'   : ',NULL AS due_date';
       $sel .= ' FROM tasks WHERE list_id=? ORDER BY position,id';
 
       $q = $pdo->prepare($sel);
@@ -99,22 +103,28 @@ try {
       $desc  = trim((string)($b['description'] ?? ''));
       $prio  = (int)($b['priority'] ?? 2); if ($prio<1 || $prio>3) $prio = 2;
       $tags  = trim((string)($b['tags'] ?? ''));
+      $start = trim((string)($b['start_date'] ?? '')) ?: null;
+      $due   = trim((string)($b['due_date']   ?? '')) ?: null;
 
       $posS = $pdo->prepare('SELECT COALESCE(MAX(position),0)+1 FROM tasks WHERE list_id=?');
       $posS->execute([$list_id]); $pos = (int)$posS->fetchColumn();
 
-      if ($hasPriority && $hasTags) {
-        $st = $pdo->prepare('INSERT INTO tasks(list_id,title,description,position,priority,tags) VALUES (?,?,?,?,?,?)');
-        $st->execute([$list_id,$title,$desc,$pos,$prio,$tags]);
-      } else {
-        $st = $pdo->prepare('INSERT INTO tasks(list_id,title,description,position) VALUES (?,?,?,?)');
-        $st->execute([$list_id,$title,$desc,$pos]);
-      }
+      $fields = ['list_id','title','description','position'];
+      $place  = ['?','?','?','?'];
+      $vals   = [$list_id,$title,$desc,$pos];
+      if ($hasPriority) { $fields[]='priority'; $place[]='?'; $vals[]=$prio; }
+      if ($hasTags)     { $fields[]='tags';     $place[]='?'; $vals[]=$tags; }
+      if ($hasStart)    { $fields[]='start_date';$place[]='?'; $vals[]=$start; }
+      if ($hasDue)      { $fields[]='due_date';  $place[]='?'; $vals[]=$due; }
+      $st = $pdo->prepare('INSERT INTO tasks('.implode(',', $fields).') VALUES ('.implode(',', $place).')');
+      $st->execute($vals);
 
       $id = (int)$pdo->lastInsertId();
       $sel = 'SELECT id,title,description,note,checked,position';
       $sel .= $hasPriority ? ',priority' : ',2 AS priority';
       $sel .= $hasTags     ? ',tags'     : ",'' AS tags";
+      $sel .= $hasStart    ? ',start_date' : ',NULL AS start_date';
+      $sel .= $hasDue      ? ',due_date'   : ',NULL AS due_date';
       $sel .= ' FROM tasks WHERE id=?';
 
       $tq = $pdo->prepare($sel);
@@ -134,16 +144,20 @@ try {
       $desc = trim((string)($b['description'] ?? ''));
       $prio = (int)($b['priority'] ?? 2); if ($prio<1 || $prio>3) $prio = 2;
       $tags = trim((string)($b['tags'] ?? ''));
+      $start = trim((string)($b['start_date'] ?? '')) ?: null;
+      $due   = trim((string)($b['due_date']   ?? '')) ?: null;
 
       if ($id<=0 || $title==='') j(['ok'=>false,'error'=>'Invalid data'],400);
 
-      if ($hasPriority && $hasTags) {
-        $st = $pdo->prepare('UPDATE tasks SET title=?, description=?, priority=?, tags=? WHERE id=? AND list_id=?');
-        $st->execute([$title,$desc,$prio,$tags,$id,$list_id]);
-      } else {
-        $st = $pdo->prepare('UPDATE tasks SET title=?, description=? WHERE id=? AND list_id=?');
-        $st->execute([$title,$desc,$id,$list_id]);
-      }
+      $fields = ['title=?','description=?'];
+      $vals   = [$title,$desc];
+      if ($hasPriority) { $fields[]='priority=?'; $vals[]=$prio; }
+      if ($hasTags)     { $fields[]='tags=?';     $vals[]=$tags; }
+      if ($hasStart)    { $fields[]='start_date=?'; $vals[]=$start; }
+      if ($hasDue)      { $fields[]='due_date=?';   $vals[]=$due; }
+      $vals[] = $id; $vals[] = $list_id;
+      $st = $pdo->prepare('UPDATE tasks SET '.implode(',', $fields).' WHERE id=? AND list_id=?');
+      $st->execute($vals);
       j(['ok'=>true]);
     }
 
@@ -168,10 +182,19 @@ try {
       $b = json_decode(file_get_contents('php://input'), true) ?: [];
       $ids = isset($b['ids']) && is_array($b['ids']) ? array_map('intval',$b['ids']) : [];
       if (!$ids) j(['ok'=>false,'error'=>'No ids'],400);
+      $dates = isset($b['dates']) && is_array($b['dates']) ? $b['dates'] : [];
 
       $pdo->beginTransaction();
       $pos = 1; $st = $pdo->prepare('UPDATE tasks SET position=? WHERE id=? AND list_id=?');
-      foreach ($ids as $id) $st->execute([$pos++, $id, $list_id]);
+      $stDate = ($hasStart || $hasDue) ? $pdo->prepare('UPDATE tasks SET start_date=?, due_date=? WHERE id=? AND list_id=?') : null;
+      foreach ($ids as $id) {
+        $st->execute([$pos++, $id, $list_id]);
+        if ($stDate && isset($dates[$id])) {
+          $sd = $dates[$id]['start_date'] ?? null;
+          $dd = $dates[$id]['due_date']   ?? null;
+          $stDate->execute([$sd ?: null, $dd ?: null, $id, $list_id]);
+        }
+      }
       $pdo->commit();
       j(['ok'=>true]);
     }

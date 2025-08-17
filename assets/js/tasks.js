@@ -53,11 +53,14 @@ export function taskItem(t){
       ${datesLine}
       ${renderChips(t.tags)}
 
-      <div class="addNote">
-        <input class="noteText" placeholder="Νέα σημείωση… (Enter για αποθήκευση)">
-        <button class="noteAddBtn" title="Προσθήκη">➕</button>
-      </div>
-      <div class="notesThread" data-loaded="0"></div>
+      <details class="taskNotes">
+        <summary class="noteSummary">Σημειώσεις</summary>
+        <div class="addNote">
+          <input class="noteText" placeholder="Νέα σημείωση… (Enter για αποθήκευση)">
+          <button class="noteAddBtn" title="Προσθήκη">➕</button>
+        </div>
+        <div class="notesThread" data-loaded="0"></div>
+      </details>
 
       <div class="editForm hidden">
         <div class="row">
@@ -258,4 +261,5 @@ export function init(){
       hide();
     };
   });
+
 }

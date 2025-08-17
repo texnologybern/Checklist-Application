@@ -259,6 +259,7 @@ export function init(){
     };
   });
 
+  // ✅ Notes toggle (κρατάμε από το main)
   const notesToggle = el('#notesToggle');
   const notesSection = el('#notesSection');
   if (notesToggle && notesSection){

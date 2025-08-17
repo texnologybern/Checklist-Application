@@ -83,6 +83,7 @@
       <div class="sectionTitle">Εργασίες</div>
       <ul class="tasks" id="taskList"></ul>
 
+      <!-- ✅ Notes section from main -->
       <div class="sectionTitle notesHeader">
         <span>Συνολικές Σημειώσεις</span>
         <button id="notesToggle" aria-expanded="false">⮟</button>

@@ -50,7 +50,7 @@ function taskItem(t){
   if (t.checked) li.classList.add('done');
 
   const datesLine = (t.start_date || t.due_date)
-    ? `<div class="dates">${t.start_date ? `<span class=\"start\">${escapeHtml(t.start_date)}</span>` : ''}${t.start_date && t.due_date ? ' – ' : ''}${t.due_date ? `<span class=\"due\">${escapeHtml(t.due_date)}</span>` : ''}</div>`
+    ? `<div class="dates">${t.start_date ? `<span class="start" title="Ημερομηνία έναρξης">Έναρξη ${escapeHtml(t.start_date)}</span>` : ''}${t.start_date && t.due_date ? ' – ' : ''}${t.due_date ? `<span class="due" title="Διορία">Διορία ${escapeHtml(t.due_date)}</span>` : ''}</div>`
     : '';
 
   li.innerHTML = `
@@ -83,9 +83,9 @@ function taskItem(t){
               <option value="3" ${t.priority==3?'selected':''}>Χαμηλή</option>
             </select>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-            <input class="editStart" type="date" value="${escapeAttr(t.start_date || '')}" placeholder="Έναρξη">
-            <input class="editDue" type="date" value="${escapeAttr(t.due_date || '')}" placeholder="Λήξη">
+          <div class="dateInputs">
+            <input class="editStart" type="date" value="${escapeAttr(t.start_date || '')}" placeholder="Έναρξη" title="Ημερομηνία έναρξης">
+            <input class="editDue" type="date" value="${escapeAttr(t.due_date || '')}" placeholder="Διορία" title="Διορία">
           </div>
           <div class="editBtns">
             <button class="saveEdit success">Αποθήκευση</button>
@@ -154,7 +154,7 @@ function taskItem(t){
       el('.desc', li).insertAdjacentHTML('afterend', renderChips(tags));
       const oldDates = el('.dates', li); if (oldDates) oldDates.remove();
       const datesLine = (start_date || due_date)
-        ? `<div class="dates">${start_date ? `<span class=\"start\">${escapeHtml(start_date)}</span>` : ''}${start_date && due_date ? ' – ' : ''}${due_date ? `<span class=\"due\">${escapeHtml(due_date)}</span>` : ''}</div>`
+        ? `<div class="dates">${start_date ? `<span class="start" title="Ημερομηνία έναρξης">Έναρξη ${escapeHtml(start_date)}</span>` : ''}${start_date && due_date ? ' – ' : ''}${due_date ? `<span class="due" title="Διορία">Διορία ${escapeHtml(due_date)}</span>` : ''}</div>`
         : '';
       el('.desc', li).insertAdjacentHTML('afterend', datesLine);
       el('.cancelEdit', li).click();
@@ -177,25 +177,24 @@ function taskItem(t){
   };
   el('.noteText', li).addEventListener('focus', ensureLoaded);
 
-// delegation: click μέσα στο thread -> delete ή lazy-load
-thread.addEventListener('click', async (e) => {
-  const del = e.target.closest('.noteDel');
-  if (del) {
-    const id = Number(del.dataset.id || 0);
-    if (!id) return;
-    if (!confirm('Διαγραφή αυτής της σημείωσης;')) return;
-    try {
-      await API('comment_delete', { id });
-      del.closest('.noteItem')?.remove();
-    } catch (err) {
-      alert(err.message);
+  // delegation: click μέσα στο thread -> delete ή lazy-load
+  thread.addEventListener('click', async (e) => {
+    const del = e.target.closest('.noteDel');
+    if (del) {
+      const id = Number(del.dataset.id || 0);
+      if (!id) return;
+      if (!confirm('Διαγραφή αυτής της σημείωσης;')) return;
+      try {
+        await API('comment_delete', { id });
+        del.closest('.noteItem')?.remove();
+      } catch (err) {
+        alert(err.message);
+      }
+      return;
     }
-    return;
-  }
-  // αλλιώς απλό κλικ → φόρτωση thread αν δεν έχει φορτωθεί
-  ensureLoaded();
-});
-
+    // αλλιώς απλό κλικ → φόρτωση thread αν δεν έχει φορτωθεί
+    ensureLoaded();
+  });
 
   const addNote = async () => {
     const inp = el('.noteText', li);
@@ -311,11 +310,11 @@ el('#addBtn')?.addEventListener('click', async () => {
   } catch (err) { alert(err.message); }
 });
 
-  el('#printBtn')?.addEventListener('click', () => {
-    const url = new URL('print.php', window.location.href);
-    url.searchParams.set('list_id', LIST_ID);
-    window.open(url.toString(), '_blank');
-  });
+el('#printBtn')?.addEventListener('click', () => {
+  const url = new URL('print.php', window.location.href);
+  url.searchParams.set('list_id', LIST_ID);
+  window.open(url.toString(), '_blank');
+});
 el('#resetBtn')?.addEventListener('click', async () => {
   if (!confirm('Σίγουρα θέλετε να καθαρίσετε όλες τις επιλογές; (Η εργασία #4 θα παραμείνει ολοκληρωμένη)')) return;
   try { await API('reset', {}); await load(); } catch (err) { alert(err.message); }

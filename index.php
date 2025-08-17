@@ -9,7 +9,7 @@
   <meta name="csrf-token" content="<?= htmlspecialchars($token, ENT_QUOTES) ?>">
   <link rel="stylesheet" href="assets/css/styles.css" />
   <link rel="manifest" href="assets/manifest.webmanifest" />
-<meta name="theme-color" content="#2563eb">
+  <meta name="theme-color" content="#2563eb">
 </head>
 <body>
   <div class="page">
@@ -42,44 +42,42 @@
       </div>
       
       <div class="sectionTitle">Φίλτρα</div>
-  <div class="filters">
-  <input id="filterSearch" placeholder="Αναζήτηση τίτλου/περιγραφής">
-  <input id="filterTag" placeholder="Ετικέτα (π.χ. Ηλεκτρικά)">
-  <select id="filterPriority">
-    <option value="">Προτεραιότητα: Όλες</option>
-    <option value="1">Υψηλή</option>
-    <option value="2">Μεσαία</option>
-    <option value="3">Χαμηλή</option>
-  </select>
-  <input type="date" id="filterFrom" title="Από">
-  <input type="date" id="filterTo" title="Έως">
-  <select id="sortDate">
-    <option value="">Ταξινόμηση: Καμία</option>
-    <option value="start_asc">Έναρξη ↑</option>
-    <option value="start_desc">Έναρξη ↓</option>
-    <option value="due_asc">Λήξη ↑</option>
-    <option value="due_desc">Λήξη ↓</option>
-  </select>
-  <label class="onlyPending"><input type="checkbox" id="filterPending"> Μόνο εκκρεμή</label>
-</div>
-
+      <div class="filters">
+        <input id="filterSearch" placeholder="Αναζήτηση τίτλου/περιγραφής">
+        <input id="filterTag" placeholder="Ετικέτα (π.χ. Ηλεκτρικά)">
+        <select id="filterPriority">
+          <option value="">Προτεραιότητα: Όλες</option>
+          <option value="1">Υψηλή</option>
+          <option value="2">Μεσαία</option>
+          <option value="3">Χαμηλή</option>
+        </select>
+        <input type="date" id="filterFrom" title="Από">
+        <input type="date" id="filterTo" title="Έως">
+        <select id="sortDate">
+          <option value="">Ταξινόμηση: Καμία</option>
+          <option value="start_asc">Έναρξη ↑</option>
+          <option value="start_desc">Έναρξη ↓</option>
+          <option value="due_asc">Λήξη ↑</option>
+          <option value="due_desc">Λήξη ↓</option>
+        </select>
+        <label class="onlyPending"><input type="checkbox" id="filterPending"> Μόνο εκκρεμή</label>
+      </div>
 
       <div class="sectionTitle">Προσθήκη νέας εργασίας</div>
       <div class="addForm">
         <input id="addTitle" placeholder="Τίτλος (π.χ. Βάψιμο υπνοδωματίου)">
         <textarea id="addDesc" placeholder="Σύντομη περιγραφή"></textarea>
         <select id="addPriority" title="Προτεραιότητα">
-  <option value="2" selected>Μεσαία</option>
-  <option value="1">Υψηλή</option>
-  <option value="3">Χαμηλή</option>
-</select>
-<input id="addTags" placeholder="Ετικέτες (π.χ. Ηλεκτρικά,Μπάνιο)">
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;">
-  <input id="addStart" type="date" placeholder="Ημ. έναρξης">
-  <input id="addDue" type="date" placeholder="Ημ. λήξης">
-</div>
+          <option value="2" selected>Μεσαία</option>
+          <option value="1">Υψηλή</option>
+          <option value="3">Χαμηλή</option>
+        </select>
+        <input id="addTags" placeholder="Ετικέτες (π.χ. Ηλεκτρικά,Μπάνιο)">
+        <div class="dateInputs">
+          <input id="addStart" type="date" placeholder="Έναρξη" title="Ημερομηνία έναρξης">
+          <input id="addDue" type="date" placeholder="Διορία" title="Διορία">
+        </div>
         <button class="success" id="addBtn">+ Προσθήκη</button>
-        
       </div>
 
       <div class="sectionTitle">Εργασίες</div>
@@ -96,11 +94,12 @@
       </footer>
     </div>
   </div>
+
   <script src="assets/js/app.js"></script>
   <script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('assets/sw.js').catch(console.error);
-}
-</script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('assets/sw.js').catch(console.error);
+    }
+  </script>
 </body>
 </html>

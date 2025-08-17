@@ -24,6 +24,7 @@ button:active{transform:translateY(1px)}
 .sectionTitle{padding:14px 28px 6px 28px;font-weight:800;color:#111827;letter-spacing:.2px}
 .addForm{display:grid;grid-template-columns:1.2fr 2fr auto;gap:10px;padding:0 28px 12px}
 .addForm input,.addForm textarea{border:1px solid var(--border);border-radius:12px;padding:10px}
+.addForm .dateInputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
 ul.tasks{list-style:none;margin:0;padding:8px 18px 24px 18px;display:grid;gap:10px}
 .task{border:1px solid var(--border);border-radius:16px;padding:12px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;background:#fff}
 .task input[type="checkbox"]{margin-top:4px;transform:scale(1.35);accent-color:var(--accent2);cursor:pointer}
@@ -132,6 +133,10 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 .task.done{ background:#f8fafc; }
 .task.done label{ color:#94a3b8; text-decoration: line-through; }
 
+/* Task dates */
+.task .dates{ font-size:12px; color:#64748b; margin-top:4px; }
+.task .dates .due{ color:var(--accent); font-weight:600; }
+
 /* Actions */
 .task{ grid-template-columns: 26px 28px 1fr 76px; }
 .actions{ display:flex; gap:8px; justify-content:flex-end; align-items:center; }
@@ -146,6 +151,7 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 .editForm{ border:1px dashed var(--border); background:#fbfdff; padding:10px; border-radius:12px; margin-top:6px; }
 .editForm .row{ display:grid; grid-template-columns:1fr; gap:8px; }
 .editForm input, .editForm textarea, .editForm select{ border:1px solid var(--border); border-radius:10px; padding:10px; width:100%; }
+.editForm .dateInputs{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 .editBtns{ display:flex; gap:8px; justify-content:flex-end; }
 
 /* Notes thread */

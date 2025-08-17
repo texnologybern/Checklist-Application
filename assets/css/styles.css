@@ -58,10 +58,12 @@ footer{padding:14px 28px 28px 28px;color:var(--muted);font-size:12px}
   .toolbar,.filters,.meta,.notesWrap,footer{display:none}
   .card{box-shadow:none}
   button{display:none}
+
   ul.tasks{padding:0}
   .task{box-shadow:none;border:1px solid #d1d5db;border-radius:8px;padding:6px;background:transparent}
   .task .handle,.task .actions{display:none}
   .task input[type="checkbox"]{transform:none;margin-top:0}
+
 }
 /* Filters bar */
 .filters{padding:0 28px 12px;display:grid;grid-template-columns:2fr 1.4fr 1.2fr auto;gap:10px}

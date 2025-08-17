@@ -112,12 +112,14 @@ export function taskItem(t){
     content.querySelector('.titleRow').classList.add('hidden');
     content.querySelector('.desc').classList.add('hidden');
     const chips = content.querySelector('.chips'); if (chips) chips.classList.add('hidden');
+    li.classList.add('editing');
   });
   el('.cancelEdit', li).addEventListener('click', () => {
     form.classList.add('hidden');
     content.querySelector('.titleRow').classList.remove('hidden');
     content.querySelector('.desc').classList.remove('hidden');
     const chips = content.querySelector('.chips'); if (chips) chips.classList.remove('hidden');
+    li.classList.remove('editing');
   });
   el('.saveEdit', li).addEventListener('click', async () => {
     const title = el('.editTitle', li).value.trim();

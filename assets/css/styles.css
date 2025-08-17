@@ -75,6 +75,7 @@ footer{padding:14px 28px 28px 28px;color:var(--muted);font-size:12px}
   .filters{grid-template-columns:1fr;padding:0 12px 12px}
   .addForm{grid-template-columns:1fr;padding:0 12px 12px}
   .task{grid-template-columns:26px minmax(0,1fr) auto;gap:8px;padding:10px}
+  .task.editing{grid-template-columns:26px 28px minmax(0,1fr)}
 }
 
 /* Desktop wide */
@@ -100,13 +101,6 @@ footer{padding:14px 28px 28px 28px;color:var(--muted);font-size:12px}
 .filters{padding:0 28px 12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
 .filters input,.filters select{border:1px solid var(--border);border-radius:12px;padding:10px;background:#fff;width:100%;min-width:0}
 .filters .onlyPending{display:flex;align-items:center;gap:8px;min-width:0}
-
-/* Tag chips & priority badges */
-.chips{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
-.chip{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid #e5e7eb;background:#f3f4f6}
-.badge.p1{background:#fee2e2;border-color:#fecaca;color:#991b1b} /* High */
-.badge.p2{background:#dbeafe;border-color:#bfdbfe;color:#1e3a8a} /* Medium */
-.badge.p3{background:#dcfce7;border-color:#bbf7d0;color:#14532d} /* Low */
 
 /* Drag handle */
 .handle{cursor:grab;user-select:none;font-size:18px;line-height:1;padding:4px 6px}
@@ -151,7 +145,7 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 }
 .task .del:hover{ background:#fee2e2; border-color:#fecaca; color:#991b1b; }
 
-/* Badges & chips (alt palette) */
+/* Badges & chips */
 .badge{ font-size:11px; padding:3px 8px; border-radius: 999px; border:1px solid #e5e7eb; }
 .badge.p1{ background:#fee2e2; border-color:#fecaca; color:#991b1b; }
 .badge.p2{ background:#e2e8f0; border-color:#cbd5e1; color:#1f2937; }
@@ -169,13 +163,16 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 .task .dates .due{ color:var(--accent); font-weight:600; }
 
 /* Actions */
-.task{ grid-template-columns: 26px 28px minmax(0,1fr) auto; }
 .actions{ display:flex; gap:8px; justify-content:flex-end; align-items:center; }
 .actions .edit{
   border: 1px solid var(--border); background: transparent; color:#0f172a;
   width: 32px; height: 32px; border-radius: 10px; display:flex; align-items:center; justify-content:center;
 }
 .actions .edit:hover{ background:#e5e7eb; }
+
+/* Editing state */
+.task.editing{ grid-template-columns:26px 28px minmax(0,1fr); }
+.task.editing .actions{ display:none; }
 
 /* Edit form */
 .hidden{ display:none !important; }
@@ -209,9 +206,7 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 .noteItem{ background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:8px 10px; }
 .noteMeta{ font-size:11px; color:#64748b; margin-top:2px; }
 
-.noteItem .noteRow{
-  display:flex; gap:8px; align-items:flex-start; justify-content:space-between;
-}
+.noteItem .noteRow{ display:flex; gap:8px; align-items:flex-start; justify-content:space-between; }
 .noteDel{
   border:1px solid var(--border);
   background:#fff;

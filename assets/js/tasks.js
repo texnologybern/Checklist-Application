@@ -1,4 +1,5 @@
 import { el, els, API, LIST_ID } from './api.js';
+import { showConfirm } from './ui.js';
 import { applyFilters } from './filters.js';
 import { initNotes } from './notes.js';
 import { attachListDnD, sendOrder } from './dnd.js';
@@ -99,10 +100,11 @@ export function taskItem(t){
     } catch (err) { alert(err.message); e.target.checked = !e.target.checked; }
   });
 
-  el('.del', li).addEventListener('click', async () => {
-    if (!confirm('Διαγραφή εργασίας;')) return;
-    try { await API('delete', { id: t.id }); li.remove(); refreshProgress(); }
-    catch (err) { alert(err.message); }
+  el('.del', li).addEventListener('click', () => {
+    showConfirm('Διαγραφή εργασίας;', async () => {
+      try { await API('delete', { id: t.id }); li.remove(); refreshProgress(); }
+      catch (err) { alert(err.message); }
+    });
   });
 
   const content = el('.content', li);
@@ -112,12 +114,16 @@ export function taskItem(t){
     content.querySelector('.titleRow').classList.add('hidden');
     content.querySelector('.desc').classList.add('hidden');
     const chips = content.querySelector('.chips'); if (chips) chips.classList.add('hidden');
+    li.classList.add('editing');
+    document.body.classList.add('editing-open');
   });
   el('.cancelEdit', li).addEventListener('click', () => {
     form.classList.add('hidden');
     content.querySelector('.titleRow').classList.remove('hidden');
     content.querySelector('.desc').classList.remove('hidden');
     const chips = content.querySelector('.chips'); if (chips) chips.classList.remove('hidden');
+    li.classList.remove('editing');
+    document.body.classList.remove('editing-open');
   });
   el('.saveEdit', li).addEventListener('click', async () => {
     const title = el('.editTitle', li).value.trim();
@@ -251,16 +257,10 @@ export function init(){
   });
 
   el('#resetBtn')?.addEventListener('click', () => {
-    const modal = el('#confirmModal');
-    if (!modal) return;
-    modal.classList.remove('hidden');
-    const hide = () => modal.classList.add('hidden');
-    el('#confirmNo', modal).onclick = hide;
-    el('#confirmYes', modal).onclick = async () => {
+    showConfirm('Να διαγραφούν όλες οι εργασίες; Η ενέργεια δεν αναιρείται.', async () => {
       try { await API('wipe'); load(); }
       catch (err) { alert(err.message); }
-      hide();
-    };
+    });
   });
 
   // Global notes toggle (από main)

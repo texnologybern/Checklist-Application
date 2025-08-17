@@ -1,4 +1,5 @@
 import { el, API } from './api.js';
+import { showConfirm } from './ui.js';
 
 function escapeHtml(s){ return (s||'').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
 
@@ -49,13 +50,14 @@ export function initNotes(li, task){
     if (del){
       const id = Number(del.dataset.id || 0);
       if (!id) return;
-      if (!confirm('Διαγραφή αυτής της σημείωσης;')) return;
-      try {
-        await API('comment_delete', { id });
-        del.closest('.noteItem')?.remove();
-      } catch (err) {
-        alert(err.message);
-      }
+      showConfirm('Διαγραφή αυτής της σημείωσης;', async () => {
+        try {
+          await API('comment_delete', { id });
+          del.closest('.noteItem')?.remove();
+        } catch (err) {
+          alert(err.message);
+        }
+      });
       return;
     }
     ensureLoaded();

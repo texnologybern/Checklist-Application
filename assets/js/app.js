@@ -24,6 +24,7 @@ function escapeHtml(s){ return (s||'').replace(/[&<>]/g, c => ({'&':'&amp;','<':
 function escapeAttr(s){ return (s||'').replace(/"/g, '&quot;'); }
 
 let BOOT = null;
+let CATS = {};
 
 function prioBadge(p){
   const map = {1:'Υψηλή',2:'Μεσαία',3:'Χαμηλή'};
@@ -44,8 +45,13 @@ function taskItem(t){
   li.dataset.id = t.id;
   li.dataset.priority = t.priority || 2;
   li.dataset.tags = (t.tags || '').toLowerCase();
+  li.dataset.category = t.category_id || '';
   li.draggable = true;
   if (t.checked) li.classList.add('done');
+
+  const cat = CATS[t.category_id] || null;
+  const catBadge = cat ? `<span class="badge catBadge" style="background:${escapeHtml(cat.color || '#64748b')}">${escapeHtml(cat.name)}</span>` : '';
+  const deadlineBadge = t.deadline ? `<span class="badge deadlineBadge">${escapeHtml(t.deadline)}</span>` : '';
 
   li.innerHTML = `
     <div class="handle" title="Μετακίνηση">≡</div>
@@ -54,6 +60,8 @@ function taskItem(t){
       <div class="titleRow">
         <label class="titleText">${escapeHtml(t.title)}</label>
         ${prioBadge(t.priority).outerHTML}
+        ${catBadge}
+        ${deadlineBadge}
       </div>
       <div class="desc">${escapeHtml(t.description || '')}</div>
       ${renderChips(t.tags)}
@@ -75,6 +83,11 @@ function taskItem(t){
               <option value="2" ${!t.priority||t.priority==2?'selected':''}>Μεσαία</option>
               <option value="3" ${t.priority==3?'selected':''}>Χαμηλή</option>
             </select>
+            <select class="editCategory">
+              <option value="">Κατηγορία</option>
+              ${Object.values(CATS).map(c=>`<option value="${c.id}" ${t.category_id==c.id?'selected':''}>${escapeHtml(c.name)}</option>`).join('')}
+            </select>
+            <input type="date" class="editDeadline" value="${escapeAttr(t.deadline || '')}">
           </div>
           <div class="editBtns">
             <button class="saveEdit success">Αποθήκευση</button>
@@ -126,15 +139,22 @@ function taskItem(t){
     const description = el('.editDesc', li).value.trim();
     const tags = el('.editTags', li).value.trim();
     const priority = Number(el('.editPriority', li).value || 2);
+    const category_id = Number(el('.editCategory', li).value || 0);
+    const deadline = el('.editDeadline', li).value || null;
     try {
-      await API('update_task', { id: t.id, title, description, tags, priority });
+      await API('update_task', { id: t.id, title, description, tags, priority, category_id, deadline });
       // update UI
       el('.titleText', li).textContent = title;
       el('.desc', li).textContent = description;
       li.dataset.priority = String(priority);
       li.dataset.tags = tags.toLowerCase();
+      li.dataset.category = category_id ? String(category_id) : '';
       const oldBadge = el('.titleRow .badge', li); if (oldBadge) oldBadge.remove();
       el('.titleRow', li).insertAdjacentElement('beforeend', prioBadge(priority));
+      const oldCat = el('.titleRow .catBadge', li); if (oldCat) oldCat.remove();
+      const cat = CATS[category_id]; if (cat) el('.titleRow', li).insertAdjacentHTML('beforeend', `<span class="badge catBadge" style="background:${escapeHtml(cat.color || '#64748b')}">${escapeHtml(cat.name)}</span>`);
+      const oldDead = el('.titleRow .deadlineBadge', li); if (oldDead) oldDead.remove();
+      if (deadline) el('.titleRow', li).insertAdjacentHTML('beforeend', `<span class="badge deadlineBadge">${escapeHtml(deadline)}</span>`);
       const oldChips = el('.chips', li); if (oldChips) oldChips.remove();
       el('.desc', li).insertAdjacentHTML('afterend', renderChips(tags));
       el('.cancelEdit', li).click();
@@ -233,6 +253,11 @@ async function load(){
 }
 function render(data){
   const list = el('#taskList'); list.innerHTML = '';
+  CATS = {}; (data.categories || []).forEach(c => { CATS[c.id] = c; });
+  const catOpts = '<option value="">Κατηγορία</option>' + (data.categories || []).map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+  if (el('#addCategory')) el('#addCategory').innerHTML = catOpts;
+  const filterOpts = '<option value="">Κατηγορία: Όλες</option>' + (data.categories || []).map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+  if (el('#filterCategory')) el('#filterCategory').innerHTML = filterOpts;
   (data.tasks || []).forEach(t => list.appendChild(taskItem(t)));
   el('#dateField').value = data.meta?.date_label || '';
   el('#ownerField').value = data.meta?.owner || '';
@@ -272,15 +297,19 @@ el('#addBtn')?.addEventListener('click', async () => {
   const title = el('#addTitle').value.trim();
   const description = el('#addDesc').value.trim();
   const priority = Number(el('#addPriority')?.value || 2);
+  const category_id = Number(el('#addCategory')?.value || 0);
+  const deadline = el('#addDeadline')?.value || null;
   const tags = el('#addTags')?.value.trim() || '';
   if (!title) { alert('Συμπληρώστε τίτλο'); return; }
   try {
-    const { task } = await API('add', { title, description, priority, tags });
+    const { task } = await API('add', { title, description, priority, tags, category_id, deadline });
     el('#taskList').appendChild(taskItem(task));
     el('#addTitle').value = '';
     el('#addDesc').value = '';
     if (el('#addTags')) el('#addTags').value = '';
     if (el('#addPriority')) el('#addPriority').value = '2';
+    if (el('#addCategory')) el('#addCategory').value = '';
+    if (el('#addDeadline')) el('#addDeadline').value = '';
     refreshProgress();
     applyFilters();
   } catch (err) { alert(err.message); }
@@ -293,7 +322,7 @@ el('#resetBtn')?.addEventListener('click', async () => {
 });
 
 /* ==== Filters ==== */
-['#filterSearch','#filterTag','#filterPriority','#filterPending'].forEach(sel=>{
+['#filterSearch','#filterTag','#filterPriority','#filterCategory','#filterPending'].forEach(sel=>{
   el(sel)?.addEventListener('input', applyFilters);
   el(sel)?.addEventListener('change', applyFilters);
 });
@@ -301,6 +330,7 @@ function applyFilters(){
   const q  = (el('#filterSearch')?.value || '').toLowerCase();
   const tg = (el('#filterTag')?.value || '').toLowerCase();
   const pr = (el('#filterPriority')?.value || '');
+  const cat = (el('#filterCategory')?.value || '');
   const onlyPending = !!el('#filterPending')?.checked;
 
   els('.task').forEach(li=>{
@@ -308,12 +338,14 @@ function applyFilters(){
     const desc  = (li.querySelector('.desc')?.textContent || '').toLowerCase();
     const tags  = (li.dataset.tags || '');
     const prio  = (li.dataset.priority || '');
+    const catId = (li.dataset.category || '');
     const done  = li.querySelector('input[type="checkbox"]').checked;
 
     let ok = true;
     if (q && !(title.includes(q) || desc.includes(q))) ok = false;
     if (tg && !tags.split(',').map(s=>s.trim()).filter(Boolean).some(x => x.includes(tg))) ok = false;
     if (pr && pr !== prio) ok = false;
+    if (cat && cat !== catId) ok = false;
     if (onlyPending && done) ok = false;
 
     li.style.display = ok ? '' : 'none';

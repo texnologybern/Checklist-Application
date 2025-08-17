@@ -19,6 +19,8 @@ function renderNoteItem(n){
 
 export function initNotes(li, task){
   const thread = el('.notesThread', li);
+  const wrapper = el('.taskNotes', li);
+  const noteInput = el('.noteText', li);
   const ensureLoaded = async () => {
     if (thread.dataset.loaded === '1') return;
     try {
@@ -29,7 +31,13 @@ export function initNotes(li, task){
       console.warn(err.message);
     }
   };
-  el('.noteText', li).addEventListener('focus', ensureLoaded);
+  noteInput?.addEventListener('focus', ensureLoaded);
+  wrapper?.addEventListener('toggle', () => {
+    if (wrapper.open){
+      ensureLoaded();
+      noteInput?.focus();
+    }
+  });
 
   thread.addEventListener('click', async (e) => {
     const del = e.target.closest('.noteDel');

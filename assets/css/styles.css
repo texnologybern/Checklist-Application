@@ -115,7 +115,7 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 .task .desc{ color:#64748b; font-size: 13px; margin: 0; }
 .task .note{ margin-top: 4px; font-size: 13px; }
 
-.task .actions{ display:flex; align-items:center; justify-content:flex-end; }
+.task .actions{ display:flex; align-items:center; justify-content:flex-end; align-self:flex-start; }
 .task .del{
   border: 1px solid var(--border); background: transparent; color:#64748b;
   width: 32px; height: 32px; border-radius: 10px; display:flex; align-items:center; justify-content:center;
@@ -158,6 +158,12 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 .editBtns{ display:flex; gap:8px; justify-content:flex-end; }
 
 /* Notes thread */
+.taskNotes{ margin-top:6px; }
+.taskNotes summary{ cursor:pointer; display:flex; align-items:center; justify-content:space-between; font-weight:600; }
+.taskNotes summary::-webkit-details-marker{ display:none; }
+.taskNotes summary::marker{ content:""; }
+.taskNotes summary::after{ content:'▼'; font-size:14px; }
+.taskNotes[open] summary::after{ content:'▲'; }
 .addNote{ margin-top:6px; display:flex; gap:8px; }
 
 /* Confirmation modal */

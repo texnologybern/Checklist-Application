@@ -1,9 +1,14 @@
-const CACHE = 'paros-checklist-v4'; // νέα έκδοση
+const CACHE = 'paros-checklist-v5'; // νέα έκδοση
 const APP_SHELL = [
   './',
   './index.php',
   './assets/css/styles.css',
-  './assets/js/app.js',
+  './assets/js/api.js',
+  './assets/js/main.js',
+  './assets/js/tasks.js',
+  './assets/js/filters.js',
+  './assets/js/notes.js',
+  './assets/js/dnd.js',
   './assets/manifest.webmanifest'
 ];
 

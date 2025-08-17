@@ -208,6 +208,15 @@ try {
       j(['ok'=>true]);
     }
 
+    case 'wipe': { // POST – διαγράφει όλες τις εργασίες και μεταδεδομένα
+      require_method('POST');
+      $pdo->beginTransaction();
+      $pdo->prepare('DELETE FROM tasks WHERE list_id=?')->execute([$list_id]);
+      $pdo->prepare('UPDATE lists SET date_label=NULL, owner=NULL, phone=NULL, notes=NULL, materials=NULL WHERE id=?')->execute([$list_id]);
+      $pdo->commit();
+      j(['ok'=>true]);
+    }
+
     /* ------- Notes (safe fallbacks) ------- */
     case 'comments': { // GET
       require_method('GET');

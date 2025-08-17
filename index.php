@@ -24,7 +24,7 @@
           <div class="toolbarButtons">
             <button class="primary" id="printBtn">🖨️ Εκτύπωση / PDF</button>
             <button id="resetBtn">↺ Επαναφορά επιλογών</button>
-            <button class="success" id="saveBtn">💾 Αποθήκευση τώρα</button>
+            <button class="success" id="exportBtn">📄 Εξαγωγή JSON</button>
           </div>
         </div>
       </header>
@@ -92,6 +92,16 @@
       <footer>
         Συμβουλή: Κάντε κλικ στο «Εκτύπωση / PDF» για να αποθηκεύσετε την τρέχουσα κατάσταση ως PDF.
       </footer>
+    </div>
+  </div>
+
+  <div id="confirmModal" class="modal hidden">
+    <div class="box">
+      <p>Να διαγραφούν όλες οι εργασίες; Η ενέργεια δεν αναιρείται.</p>
+      <div class="actions">
+        <button id="confirmYes" class="danger">Διαγραφή</button>
+        <button id="confirmNo">Άκυρο</button>
+      </div>
     </div>
   </div>
 

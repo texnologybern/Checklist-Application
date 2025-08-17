@@ -1,4 +1,4 @@
-import { el, els, API } from './api.js';
+import { el, els, API, LIST_ID } from './api.js';
 import { applyFilters } from './filters.js';
 import { initNotes } from './notes.js';
 import { attachListDnD, sendOrder } from './dnd.js';
@@ -229,4 +229,33 @@ export function init(){
       toolbar.classList.toggle('open');
     });
   }
+
+  el('#printBtn')?.addEventListener('click', () => {
+    window.open(`print.php?list_id=${LIST_ID}`, '_blank');
+  });
+
+  el('#exportBtn')?.addEventListener('click', async () => {
+    try {
+      const data = await API('bootstrap');
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'checklist.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) { alert(err.message); }
+  });
+
+  el('#resetBtn')?.addEventListener('click', () => {
+    const modal = el('#confirmModal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    const hide = () => modal.classList.add('hidden');
+    el('#confirmNo', modal).onclick = hide;
+    el('#confirmYes', modal).onclick = async () => {
+      try { await API('wipe'); load(); }
+      catch (err) { alert(err.message); }
+      hide();
+    };
+  });
 }

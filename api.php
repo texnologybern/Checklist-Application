@@ -43,10 +43,7 @@ try {
   // runtime feature detection (ώστε να λειτουργεί ακόμη κι αν λείπουν migrations)
   $hasPriority = col_exists($pdo, 'tasks', 'priority');
   $hasTags     = col_exists($pdo, 'tasks', 'tags');
-  $hasDeadline = col_exists($pdo, 'tasks', 'deadline');
-  $hasCategory = col_exists($pdo, 'tasks', 'category_id');
   $hasNotesTbl = table_exists($pdo, 'task_notes');
-  $hasCategoriesTbl = table_exists($pdo, 'categories');
 
   switch ($action) {
 
@@ -55,8 +52,6 @@ try {
 
       // SELECT με fallbacks
       $sel = 'SELECT id,title,description,note,checked,position';
-      $sel .= $hasDeadline ? ',deadline' : ',NULL AS deadline';
-      $sel .= $hasCategory ? ',category_id' : ',NULL AS category_id';
       $sel .= $hasPriority ? ',priority' : ',2 AS priority';
       $sel .= $hasTags     ? ',tags'     : ",'' AS tags";
       $sel .= ' FROM tasks WHERE list_id=? ORDER BY position,id';
@@ -64,18 +59,7 @@ try {
       $q = $pdo->prepare($sel);
       $q->execute([$list_id]);
       $tasks = $q->fetchAll();
-      foreach ($tasks as &$t) {
-        $t['checked'] = (int)$t['checked'];
-        $t['priority'] = (int)$t['priority'];
-        if (isset($t['category_id'])) $t['category_id'] = $t['category_id'] !== null ? (int)$t['category_id'] : null;
-      }
-
-      $cats = [];
-      if ($hasCategoriesTbl) {
-        $qc = $pdo->prepare('SELECT id,name,color,position FROM categories WHERE list_id=? ORDER BY position,id');
-        $qc->execute([$list_id]);
-        $cats = $qc->fetchAll();
-      }
+      foreach ($tasks as &$t) { $t['checked'] = (int)$t['checked']; $t['priority'] = (int)$t['priority']; }
 
       $q2 = $pdo->prepare('SELECT id,name,location,date_label,owner,phone,notes,materials FROM lists WHERE id=?');
       $q2->execute([$list_id]); $meta = $q2->fetch() ?: [];
@@ -83,7 +67,6 @@ try {
       j([
         'ok'=>true,
         'tasks'=>$tasks,
-        'categories'=>$cats,
         'meta'=>$meta,
         'progress'=>progress($pdo,$list_id),
         'csrf'=>csrf_token()
@@ -116,27 +99,20 @@ try {
       $desc  = trim((string)($b['description'] ?? ''));
       $prio  = (int)($b['priority'] ?? 2); if ($prio<1 || $prio>3) $prio = 2;
       $tags  = trim((string)($b['tags'] ?? ''));
-      $deadline = $hasDeadline ? ($b['deadline'] ?? null) : null;
-      $cat_id   = $hasCategory ? (int)($b['category_id'] ?? 0) : 0;
 
       $posS = $pdo->prepare('SELECT COALESCE(MAX(position),0)+1 FROM tasks WHERE list_id=?');
       $posS->execute([$list_id]); $pos = (int)$posS->fetchColumn();
 
-      $cols = ['list_id','title','description','position'];
-      $vals = [$list_id,$title,$desc,$pos];
-      if ($hasDeadline) { $cols[]='deadline'; $vals[]=$deadline; }
-      if ($hasCategory) { $cols[]='category_id'; $vals[]=$cat_id>0?$cat_id:null; }
-      if ($hasPriority) { $cols[]='priority'; $vals[]=$prio; }
-      if ($hasTags)     { $cols[]='tags';     $vals[]=$tags; }
-
-      $placeholders = implode(',', array_fill(0, count($vals), '?'));
-      $st = $pdo->prepare('INSERT INTO tasks('.implode(',',$cols).') VALUES ('.$placeholders.')');
-      $st->execute($vals);
+      if ($hasPriority && $hasTags) {
+        $st = $pdo->prepare('INSERT INTO tasks(list_id,title,description,position,priority,tags) VALUES (?,?,?,?,?,?)');
+        $st->execute([$list_id,$title,$desc,$pos,$prio,$tags]);
+      } else {
+        $st = $pdo->prepare('INSERT INTO tasks(list_id,title,description,position) VALUES (?,?,?,?)');
+        $st->execute([$list_id,$title,$desc,$pos]);
+      }
 
       $id = (int)$pdo->lastInsertId();
       $sel = 'SELECT id,title,description,note,checked,position';
-      $sel .= $hasDeadline ? ',deadline' : ',NULL AS deadline';
-      $sel .= $hasCategory ? ',category_id' : ',NULL AS category_id';
       $sel .= $hasPriority ? ',priority' : ',2 AS priority';
       $sel .= $hasTags     ? ',tags'     : ",'' AS tags";
       $sel .= ' FROM tasks WHERE id=?';
@@ -146,7 +122,6 @@ try {
       $task = $tq->fetch();
       $task['checked']  = (int)$task['checked'];
       $task['priority'] = (int)$task['priority'];
-      if (isset($task['category_id'])) $task['category_id'] = $task['category_id'] !== null ? (int)$task['category_id'] : null;
 
       j(['ok'=>true,'task'=>$task]);
     }
@@ -159,20 +134,16 @@ try {
       $desc = trim((string)($b['description'] ?? ''));
       $prio = (int)($b['priority'] ?? 2); if ($prio<1 || $prio>3) $prio = 2;
       $tags = trim((string)($b['tags'] ?? ''));
-      $deadline = $hasDeadline ? ($b['deadline'] ?? null) : null;
-      $cat_id   = $hasCategory ? (int)($b['category_id'] ?? 0) : 0;
 
       if ($id<=0 || $title==='') j(['ok'=>false,'error'=>'Invalid data'],400);
 
-      $updates = ['title=?','description=?'];
-      $params = [$title,$desc];
-      if ($hasDeadline) { $updates[]='deadline=?'; $params[]=$deadline; }
-      if ($hasCategory) { $updates[]='category_id=?'; $params[]=$cat_id>0?$cat_id:null; }
-      if ($hasPriority) { $updates[]='priority=?'; $params[]=$prio; }
-      if ($hasTags)     { $updates[]='tags=?';     $params[]=$tags; }
-      $params[] = $id; $params[] = $list_id;
-      $st = $pdo->prepare('UPDATE tasks SET '.implode(',', $updates).' WHERE id=? AND list_id=?');
-      $st->execute($params);
+      if ($hasPriority && $hasTags) {
+        $st = $pdo->prepare('UPDATE tasks SET title=?, description=?, priority=?, tags=? WHERE id=? AND list_id=?');
+        $st->execute([$title,$desc,$prio,$tags,$id,$list_id]);
+      } else {
+        $st = $pdo->prepare('UPDATE tasks SET title=?, description=? WHERE id=? AND list_id=?');
+        $st->execute([$title,$desc,$id,$list_id]);
+      }
       j(['ok'=>true]);
     }
 
@@ -181,47 +152,6 @@ try {
       $b = json_decode(file_get_contents('php://input'), true) ?: [];
       $id = (int)($b['id'] ?? 0);
       $pdo->prepare('DELETE FROM tasks WHERE id=? AND list_id=?')->execute([$id,$list_id]);
-      j(['ok'=>true]);
-    }
-
-    case 'category_add': { // POST
-      require_method('POST');
-      if (!$hasCategoriesTbl) j(['ok'=>false,'error'=>'Categories not enabled'],400);
-      $b = json_decode(file_get_contents('php://input'), true) ?: [];
-      $name = trim((string)($b['name'] ?? ''));
-      if ($name==='') j(['ok'=>false,'error'=>'Name required'],400);
-      $color = trim((string)($b['color'] ?? ''));
-      $posS = $pdo->prepare('SELECT COALESCE(MAX(position),0)+1 FROM categories WHERE list_id=?');
-      $posS->execute([$list_id]); $pos = (int)$posS->fetchColumn();
-      $st = $pdo->prepare('INSERT INTO categories(list_id,name,color,position) VALUES (?,?,?,?)');
-      $st->execute([$list_id,$name,$color,$pos]);
-      $id = (int)$pdo->lastInsertId();
-      j(['ok'=>true,'category'=>['id'=>$id,'name'=>$name,'color'=>$color,'position'=>$pos]]);
-    }
-
-    case 'category_update': { // POST
-      require_method('POST');
-      if (!$hasCategoriesTbl) j(['ok'=>false,'error'=>'Categories not enabled'],400);
-      $b = json_decode(file_get_contents('php://input'), true) ?: [];
-      $id   = (int)($b['id'] ?? 0);
-      $name = trim((string)($b['name'] ?? ''));
-      $color= trim((string)($b['color'] ?? ''));
-      if ($id<=0 || $name==='') j(['ok'=>false,'error'=>'Invalid data'],400);
-      $st = $pdo->prepare('UPDATE categories SET name=?, color=? WHERE id=? AND list_id=?');
-      $st->execute([$name,$color,$id,$list_id]);
-      j(['ok'=>true]);
-    }
-
-    case 'category_delete': { // POST
-      require_method('POST');
-      if (!$hasCategoriesTbl) j(['ok'=>true]);
-      $b = json_decode(file_get_contents('php://input'), true) ?: [];
-      $id = (int)($b['id'] ?? 0);
-      if ($id<=0) j(['ok'=>false,'error'=>'Invalid id'],400);
-      $pdo->prepare('DELETE FROM categories WHERE id=? AND list_id=?')->execute([$id,$list_id]);
-      if ($hasCategory) {
-        $pdo->prepare('UPDATE tasks SET category_id=NULL WHERE category_id=? AND list_id=?')->execute([$id,$list_id]);
-      }
       j(['ok'=>true]);
     }
 

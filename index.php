@@ -48,28 +48,23 @@
     <option value="2">Μεσαία</option>
     <option value="3">Χαμηλή</option>
   </select>
-  <select id="filterCategory">
-    <option value="">Κατηγορία: Όλες</option>
-  </select>
   <label class="onlyPending"><input type="checkbox" id="filterPending"> Μόνο εκκρεμή</label>
 </div>
 
 
       <div class="sectionTitle">Προσθήκη νέας εργασίας</div>
-  <div class="addForm">
-    <input id="addTitle" placeholder="Τίτλος (π.χ. Βάψιμο υπνοδωματίου)">
-    <textarea id="addDesc" placeholder="Σύντομη περιγραφή"></textarea>
-    <select id="addPriority" title="Προτεραιότητα">
+      <div class="addForm">
+        <input id="addTitle" placeholder="Τίτλος (π.χ. Βάψιμο υπνοδωματίου)">
+        <textarea id="addDesc" placeholder="Σύντομη περιγραφή"></textarea>
+        <select id="addPriority" title="Προτεραιότητα">
   <option value="2" selected>Μεσαία</option>
   <option value="1">Υψηλή</option>
   <option value="3">Χαμηλή</option>
 </select>
-<select id="addCategory" title="Κατηγορία"></select>
-<input type="date" id="addDeadline" title="Προθεσμία">
 <input id="addTags" placeholder="Ετικέτες (π.χ. Ηλεκτρικά,Μπάνιο)">
-    <button class="success" id="addBtn">+ Προσθήκη</button>
-
-  </div>
+        <button class="success" id="addBtn">+ Προσθήκη</button>
+        
+      </div>
 
       <div class="sectionTitle">Εργασίες</div>
       <ul class="tasks" id="taskList"></ul>

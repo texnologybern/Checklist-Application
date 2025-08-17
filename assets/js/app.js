@@ -286,7 +286,11 @@ el('#addBtn')?.addEventListener('click', async () => {
   } catch (err) { alert(err.message); }
 });
 
-el('#printBtn')?.addEventListener('click', () => window.print());
+  el('#printBtn')?.addEventListener('click', () => {
+    const url = new URL('print.php', window.location.href);
+    url.searchParams.set('list_id', LIST_ID);
+    window.open(url.toString(), '_blank');
+  });
 el('#resetBtn')?.addEventListener('click', async () => {
   if (!confirm('Σίγουρα θέλετε να καθαρίσετε όλες τις επιλογές; (Η εργασία #4 θα παραμείνει ολοκληρωμένη)')) return;
   try { await API('reset', {}); await load(); } catch (err) { alert(err.message); }

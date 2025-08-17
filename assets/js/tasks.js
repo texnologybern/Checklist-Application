@@ -53,6 +53,7 @@ export function taskItem(t){
       ${datesLine}
       ${renderChips(t.tags)}
 
+      <!-- ΝΕΟ: per-task notes με details/summary -->
       <details class="taskNotes">
         <summary class="noteSummary">Σημειώσεις</summary>
         <div class="addNote">
@@ -262,4 +263,13 @@ export function init(){
     };
   });
 
+  // Global notes toggle (από main)
+  const notesToggle = el('#notesToggle');
+  const notesSection = el('#notesSection');
+  if (notesToggle && notesSection){
+    notesToggle.addEventListener('click', () => {
+      notesSection.classList.toggle('hidden');
+      notesToggle.textContent = notesSection.classList.contains('hidden') ? '⮟' : '⮝';
+    });
+  }
 }

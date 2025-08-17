@@ -83,8 +83,12 @@
       <div class="sectionTitle">Εργασίες</div>
       <ul class="tasks" id="taskList"></ul>
 
-      <div class="sectionTitle">Συνολικές Σημειώσεις</div>
-      <div class="notesWrap">
+      <!-- ✅ Notes section from main -->
+      <div class="sectionTitle notesHeader">
+        <span>Συνολικές Σημειώσεις</span>
+        <button id="notesToggle" aria-expanded="false">⮟</button>
+      </div>
+      <div class="notesWrap hidden" id="notesSection">
         <textarea id="notes" placeholder="Γενικές παρατηρήσεις, ημερολόγιο εργασιών, εκκρεμότητες."></textarea>
         <textarea id="materials" placeholder="Υλικά προς αγορά / παραγγελίες."></textarea>
       </div>

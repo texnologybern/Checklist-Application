@@ -1,4 +1,5 @@
 import { el, els, API, LIST_ID } from './api.js';
+import { showConfirm } from './ui.js';
 import { applyFilters } from './filters.js';
 import { initNotes } from './notes.js';
 import { attachListDnD, sendOrder } from './dnd.js';
@@ -91,6 +92,8 @@ export function taskItem(t){
       <button class="del" title="Διαγραφή">🗑️</button>
     </div>
   `;
+
+  // Toggle done
   el('input[type="checkbox"]', li).addEventListener('change', async e => {
     try {
       await API('toggle', { id: t.id, checked: e.target.checked });
@@ -99,28 +102,37 @@ export function taskItem(t){
     } catch (err) { alert(err.message); e.target.checked = !e.target.checked; }
   });
 
-  el('.del', li).addEventListener('click', async () => {
-    if (!confirm('Διαγραφή εργασίας;')) return;
-    try { await API('delete', { id: t.id }); li.remove(); refreshProgress(); }
-    catch (err) { alert(err.message); }
+  // Delete
+  el('.del', li).addEventListener('click', () => {
+    showConfirm('Διαγραφή εργασίας;', async () => {
+      try { await API('delete', { id: t.id }); li.remove(); refreshProgress(); }
+      catch (err) { alert(err.message); }
+    });
   });
 
+  // Edit open/close
   const content = el('.content', li);
   const form = el('.editForm', li);
+
   el('.edit', li).addEventListener('click', () => {
     form.classList.remove('hidden');
     content.querySelector('.titleRow').classList.add('hidden');
     content.querySelector('.desc').classList.add('hidden');
     const chips = content.querySelector('.chips'); if (chips) chips.classList.add('hidden');
     li.classList.add('editing');
+    document.body.classList.add('editing-open'); // κλείδωμα scroll σε mobile
   });
+
   el('.cancelEdit', li).addEventListener('click', () => {
     form.classList.add('hidden');
     content.querySelector('.titleRow').classList.remove('hidden');
     content.querySelector('.desc').classList.remove('hidden');
     const chips = content.querySelector('.chips'); if (chips) chips.classList.remove('hidden');
     li.classList.remove('editing');
+    document.body.classList.remove('editing-open'); // άνοιγμα scroll
   });
+
+  // Save
   el('.saveEdit', li).addEventListener('click', async () => {
     const title = el('.editTitle', li).value.trim();
     if (!title) { alert('Γράψε τίτλο'); return; }
@@ -137,20 +149,26 @@ export function taskItem(t){
       li.dataset.tags       = tags.toLowerCase();
       li.dataset.start_date = start_date || '';
       li.dataset.due_date   = due_date   || '';
+
       const oldBadge = el('.titleRow .badge', li); if (oldBadge) oldBadge.remove();
       el('.titleRow', li).insertAdjacentElement('beforeend', prioBadge(priority));
+
       const oldChips = el('.chips', li); if (oldChips) oldChips.remove();
       el('.desc', li).insertAdjacentHTML('afterend', renderChips(tags));
+
       const oldDates = el('.dates', li); if (oldDates) oldDates.remove();
       const datesLine = renderDates(start_date, due_date);
       el('.desc', li).insertAdjacentHTML('afterend', datesLine);
-      el('.cancelEdit', li).click();
+
+      el('.cancelEdit', li).click(); // κλείσιμο edit & αφαίρεση body.editing-open
       applyFilters();
     } catch (err) { alert(err.message); }
   });
 
+  // Notes init
   initNotes(li, t);
 
+  // Drag & drop
   li.addEventListener('dragstart', e => { li.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
   li.addEventListener('dragend',   async () => { li.classList.remove('dragging'); await sendOrder(); });
 
@@ -253,19 +271,13 @@ export function init(){
   });
 
   el('#resetBtn')?.addEventListener('click', () => {
-    const modal = el('#confirmModal');
-    if (!modal) return;
-    modal.classList.remove('hidden');
-    const hide = () => modal.classList.add('hidden');
-    el('#confirmNo', modal).onclick = hide;
-    el('#confirmYes', modal).onclick = async () => {
+    showConfirm('Να διαγραφούν όλες οι εργασίες; Η ενέργεια δεν αναιρείται.', async () => {
       try { await API('wipe'); load(); }
       catch (err) { alert(err.message); }
-      hide();
-    };
+    });
   });
 
-  // Global notes toggle (από main)
+  // Global notes toggle
   const notesToggle = el('#notesToggle');
   const notesSection = el('#notesSection');
   if (notesToggle && notesSection){

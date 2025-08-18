@@ -36,6 +36,7 @@ function setupAddModal(){
   const cancel = el('#modalCancel');
   const save = el('#modalSave');
   if (!fab || !modal) return;
+
   const show = () => {
     modal.classList.remove('hidden');
     document.body.classList.add('editing-open');
@@ -44,6 +45,7 @@ function setupAddModal(){
     modal.classList.add('hidden');
     document.body.classList.remove('editing-open');
   };
+
   fab.addEventListener('click', show);
   cancel?.addEventListener('click', hide);
   save?.addEventListener('click', () => {

@@ -135,7 +135,7 @@ button.fab{display:none;width:56px;height:56px;border-radius:50%;background:var(
   .notesWrap{grid-template-columns:1fr;padding:0 12px 28px}
   .filters{grid-template-columns:1fr;padding:0 12px 12px}
   #addSectionTitle,.sidebar .addForm{display:none}
-  .fab{display:flex;position:fixed;bottom:20px;right:20px}
+  button.fab{display:flex;position:fixed;bottom:20px;right:20px}
   .tagPrio{grid-template-columns:1fr}
   .editForm .dateInputs{grid-template-columns:1fr}
   .addForm .dateInputs{grid-template-columns:1fr}

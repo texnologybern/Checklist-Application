@@ -15,7 +15,7 @@
   <div class="page">
     <div class="card">
       <header>
-        <div>
+        <div class="titleWrap">
           <div class="title">Λίστα Εργασιών – Πάρος</div>
           <div class="subtitle">Συντήρηση & αναβαθμίσεις κατοικίας. Επιλέξτε τα κουτάκια για να σημειώσετε ό,τι ολοκληρώθηκε.</div>
         </div>

@@ -128,17 +128,22 @@ button.fab{display:none;width:56px;height:56px;border-radius:50%;background:var(
 
 /* Mobile */
 @media (max-width:768px){
+  header{display:flex;flex-direction:column;gap:12px;align-items:stretch}
+  .titleWrap{order:2;text-align:center}
+  .toolbar{order:1;flex-wrap:nowrap}
+  .toolbar #menuBtn{order:1}
+  .toolbar #filtersBtn{order:2;margin-left:auto}
+  .toolbar .themeSwitch{order:3}
   .meta{grid-template-columns:1fr 1fr}
   .addForm{grid-template-columns:1fr}
   .notesWrap{grid-template-columns:1fr}
   .filters{grid-template-columns:1fr 1fr}
-  .toolbarButtons{display:none;flex-direction:column;position:absolute;top:100%;right:0;background:var(--card);padding:10px;border:1px solid var(--border);border-radius:12px;gap:10px}
+  .toolbarButtons{display:none;flex-direction:column;position:absolute;top:100%;left:0;background:var(--card);padding:10px;border:1px solid var(--border);border-radius:12px;gap:10px}
   .toolbar.open .toolbarButtons{display:flex}
   .menuBtn{display:block}
 }
 @media (max-width:480px){
   .page{padding:12px}
-  header{grid-template-columns:1fr auto}
   .meta{grid-template-columns:1fr;padding:0 12px 18px}
   ul.tasks{grid-template-columns:1fr}
   .notesWrap{grid-template-columns:1fr;padding:0 12px 28px}

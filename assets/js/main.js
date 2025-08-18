@@ -1,5 +1,6 @@
 import { init } from './tasks.js';
 import './filters.js';
+import { el } from './api.js';
 
 function setupThemeToggle() {
   const toggle = document.getElementById('themeToggle');
@@ -26,4 +27,35 @@ function setupThemeToggle() {
 document.addEventListener('DOMContentLoaded', () => {
   setupThemeToggle();
   init();
+  setupAddModal();
 });
+
+function setupAddModal(){
+  const fab = el('#fabBtn');
+  const modal = el('#addModal');
+  const cancel = el('#modalCancel');
+  const save = el('#modalSave');
+  if (!fab || !modal) return;
+  const show = () => {
+    modal.classList.remove('hidden');
+    document.body.classList.add('editing-open');
+  };
+  const hide = () => {
+    modal.classList.add('hidden');
+    document.body.classList.remove('editing-open');
+  };
+  fab.addEventListener('click', show);
+  cancel?.addEventListener('click', hide);
+  save?.addEventListener('click', () => {
+    ['Title','Desc','Priority','Tags','Start','Due'].forEach(f => {
+      const src = el('#modal' + f);
+      const dst = el('#add' + f);
+      if (src && dst) dst.value = src.value;
+    });
+    el('#addBtn')?.click();
+    hide();
+    ['Title','Desc','Priority','Tags','Start','Due'].forEach(f => {
+      const src = el('#modal' + f); if (src) src.value = '';
+    });
+  });
+}

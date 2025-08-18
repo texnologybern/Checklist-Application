@@ -54,7 +54,7 @@ export function taskItem(t){
       ${datesLine}
       ${renderChips(t.tags)}
 
-      <!-- ΝΕΟ: per-task notes με details/summary -->
+      <!-- Per-task notes -->
       <details class="taskNotes">
         <summary class="noteSummary">Σημειώσεις</summary>
         <div class="addNote">
@@ -64,11 +64,11 @@ export function taskItem(t){
         <div class="notesThread" data-loaded="0"></div>
       </details>
 
-      <div class="editForm hidden">
+      <div class="editForm">
         <div class="row">
           <input class="editTitle" placeholder="Τίτλος" value="${escapeAttr(t.title)}">
           <textarea class="editDesc" placeholder="Περιγραφή">${escapeHtml(t.description || '')}</textarea>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="tagPrio">
             <input class="editTags" placeholder="Ετικέτες (π.χ. Ηλεκτρικά,Μπάνιο)" value="${escapeAttr(t.tags || '')}">
             <select class="editPriority">
               <option value="1" ${t.priority==1?'selected':''}>Υψηλή</option>
@@ -112,10 +112,8 @@ export function taskItem(t){
 
   // Edit open/close
   const content = el('.content', li);
-  const form = el('.editForm', li);
 
   el('.edit', li).addEventListener('click', () => {
-    form.classList.remove('hidden');
     content.querySelector('.titleRow').classList.add('hidden');
     content.querySelector('.desc').classList.add('hidden');
     const chips = content.querySelector('.chips'); if (chips) chips.classList.add('hidden');
@@ -124,7 +122,6 @@ export function taskItem(t){
   });
 
   el('.cancelEdit', li).addEventListener('click', () => {
-    form.classList.add('hidden');
     content.querySelector('.titleRow').classList.remove('hidden');
     content.querySelector('.desc').classList.remove('hidden');
     const chips = content.querySelector('.chips'); if (chips) chips.classList.remove('hidden');
@@ -154,11 +151,12 @@ export function taskItem(t){
       el('.titleRow', li).insertAdjacentElement('beforeend', prioBadge(priority));
 
       const oldChips = el('.chips', li); if (oldChips) oldChips.remove();
-      el('.desc', li).insertAdjacentHTML('afterend', renderChips(tags));
-
       const oldDates = el('.dates', li); if (oldDates) oldDates.remove();
+
+      // Εισαγωγή με σωστή σειρά: dates πρώτα, μετά chips
       const datesLine = renderDates(start_date, due_date);
       el('.desc', li).insertAdjacentHTML('afterend', datesLine);
+      el('.desc', li).insertAdjacentHTML('afterend', renderChips(tags));
 
       el('.cancelEdit', li).click(); // κλείσιμο edit & αφαίρεση body.editing-open
       applyFilters();

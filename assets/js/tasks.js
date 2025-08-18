@@ -242,6 +242,23 @@ export function init(){
     });
   }
 
+  const filtersBtn = el('#filtersBtn');
+  const filtersPanel = el('#filtersPanel');
+  if (filtersBtn && filtersPanel) {
+    const closePanel = () => filtersPanel.classList.remove('open');
+    filtersBtn.addEventListener('click', () => {
+      filtersPanel.classList.toggle('open');
+    });
+    filtersPanel.addEventListener('click', (e) => {
+      if (e.target === filtersPanel) closePanel();
+    });
+    let startX = 0;
+    filtersPanel.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
+    filtersPanel.addEventListener('touchend', e => {
+      if (e.changedTouches[0].clientX - startX > 50) closePanel();
+    });
+  }
+
   el('#printBtn')?.addEventListener('click', () => {
     window.open(`print.php?list_id=${LIST_ID}`, '_blank');
   });

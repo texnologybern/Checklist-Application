@@ -123,6 +123,13 @@ footer{padding:14px 28px 28px 28px;color:var(--muted);font-size:12px}
 .filters .onlyPending input{width:auto;transform:scale(1.2);accent-color:var(--accent2)}
 .filters .onlyPending{display:flex;align-items:center;gap:8px;min-width:0}
 
+/* Tag chips & priority badges */
+.chips{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid #e5e7eb;background:#f3f4f6}
+.badge.p1{background:#fee2e2;border-color:#fecaca;color:#991b1b} /* High */
+.badge.p2{background:#dbeafe;border-color:#bfdbfe;color:#1e3a8a} /* Medium */
+.badge.p3{background:#dcfce7;border-color:#bbf7d0;color:#14532d} /* Low */
+
 /* Drag handle */
 .handle{cursor:grab;user-select:none;font-size:18px;line-height:1;padding:4px 6px}
 .task.dragging{opacity:.6}
@@ -159,21 +166,21 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 .task .desc{ color:#64748b; font-size: 13px; margin: 0; word-break:break-word; overflow-wrap:anywhere; }
 .task .note{ margin-top: 4px; font-size: 13px; word-break:break-word; overflow-wrap:anywhere; }
 
-.task .actions{ display:flex; align-items:center; justify-content:flex-end; align-self:flex-start; }
-.task .del{
-  border: 1px solid var(--border); background: transparent; color:#64748b;
+/* Completed state */
+.task.done{ background:#f8fafc; }
+.task.done label{ color:#94a3b8; text-decoration: line-through; }
+
+/* Task dates */
+.task .dates{ font-size:12px; color:#64748b; margin-top:4px; }
+.task .dates .due{ color:var(--accent); font-weight:600; }
+
+/* Actions */
+.actions{ display:flex; gap:8px; justify-content:flex-end; align-items:center; }
+.actions .edit{
+  border: 1px solid var(--border); background: transparent; color:#0f172a;
   width: 32px; height: 32px; border-radius: 10px; display:flex; align-items:center; justify-content:center;
 }
-.task .del:hover{ background:#fee2e2; border-color:#fecaca; color:#991b1b; }
-
-/* Badges & chips */
-.badge{ font-size:11px; padding:3px 8px; border-radius: 999px; border:1px solid #e5e7eb; }
-.badge.p1{ background:#fee2e2; border-color:#fecaca; color:#991b1b; }
-.badge.p2{ background:#e2e8f0; border-color:#cbd5e1; color:#1f2937; }
-.badge.p3{ background:#dcfce7; border-color:#bbf7d0; color:#14532d; }
-
-.chips{ display:flex; gap:6px; flex-wrap:wrap; }
-.chip{ font-size:11px; padding:3px 8px; border-radius:999px; border:1px solid #e5e7eb; background:#f3f4f6; }
+.actions .edit:hover{ background:#e5e7eb; }
 
 /* Editing state */
 .task.editing{ grid-template-columns:1fr; }
@@ -183,10 +190,12 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 
 /* Edit form */
 .hidden{ display:none !important; }
-.editForm{ border:1px dashed var(--border); background:#fbfdff; padding:10px; border-radius:12px; margin-top:6px; }
+.task .editForm{ display:none; border:1px dashed var(--border); background:#fbfdff; padding:10px; border-radius:12px; margin-top:6px; }
+.task.editing .editForm{ display:block; }
 .editForm .row{ display:grid; grid-template-columns:1fr; gap:8px; }
 .editForm input, .editForm textarea, .editForm select{ border:1px solid var(--border); border-radius:10px; padding:10px; width:100%; }
 .editForm select{-webkit-appearance:none;appearance:none;padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23677389' d='M5 6L0 0h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:10px}
+.tagPrio{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 .editForm .dateInputs{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 .editForm .dateInputs input{ text-align:center; }
 .editBtns{ display:flex; gap:8px; justify-content:flex-end; }

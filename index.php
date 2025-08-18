@@ -1,4 +1,4 @@
-<?php require_once __DIR__ . '/app/bootstrap.php'; ensure_migrated(); $token = csrf_token(); $list_id = (int)($_GET['list_id'] ?? 1); require_auth($list_id); $token = csrf_token(); ?>
+<?php require_once __DIR__ . '/app/bootstrap.php'; ensure_migrated(); $list_id = (int)($_GET['list_id'] ?? 1); require_auth($list_id); $token = csrf_token(); ?>
 
 <!doctype html>
 <html lang="el">
@@ -49,7 +49,7 @@
         <div class="sectionTitle">Εργασίες</div>
         <ul class="tasks" id="taskList"></ul>
 
-        <!-- ✅ Notes section from main -->
+        <!-- ✅ Notes section -->
         <div class="sectionTitle notesHeader">
           <span>Συνολικές Σημειώσεις</span>
           <button id="notesToggle" aria-expanded="false">⮟</button>
@@ -121,6 +121,7 @@
 
   <div id="addModal" class="modal hidden">
     <div class="box">
+      <div class="modalTitle">Προσθήκη εργασίας</div>
       <div class="addForm">
         <input id="modalTitle" placeholder="Τίτλος (π.χ. Βάψιμο υπνοδωματίου)">
         <textarea id="modalDesc" placeholder="Σύντομη περιγραφή"></textarea>

@@ -87,7 +87,7 @@
           <label class="onlyPending"><input type="checkbox" id="filterPending"> Μόνο εκκρεμή</label>
         </div>
 
-        <div class="sectionTitle">Προσθήκη νέας εργασίας</div>
+        <div class="sectionTitle" id="addSectionTitle">Προσθήκη νέας εργασίας</div>
         <div class="addForm">
           <input id="addTitle" placeholder="Τίτλος (π.χ. Βάψιμο υπνοδωματίου)">
           <textarea id="addDesc" placeholder="Σύντομη περιγραφή"></textarea>
@@ -107,12 +107,37 @@
     </div>
   </div>
 
+  <button class="fab" id="fabBtn">+</button>
+
   <div id="confirmModal" class="modal hidden">
     <div class="box">
       <p id="confirmText">Να διαγραφούν όλες οι εργασίες; Η ενέργεια δεν αναιρείται.</p>
       <div class="actions">
         <button id="confirmYes" class="danger">Διαγραφή</button>
         <button id="confirmNo">Άκυρο</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="addModal" class="modal hidden">
+    <div class="box">
+      <div class="addForm">
+        <input id="modalTitle" placeholder="Τίτλος (π.χ. Βάψιμο υπνοδωματίου)">
+        <textarea id="modalDesc" placeholder="Σύντομη περιγραφή"></textarea>
+        <select id="modalPriority" title="Προτεραιότητα">
+          <option value="2" selected>Μεσαία</option>
+          <option value="1">Υψηλή</option>
+          <option value="3">Χαμηλή</option>
+        </select>
+        <input id="modalTags" placeholder="Ετικέτες (π.χ. Ηλεκτρικά,Μπάνιο)">
+        <div class="dateInputs">
+          <input id="modalStart" type="date" placeholder="Από" title="Ημερομηνία αρχής">
+          <input id="modalDue" type="date" placeholder="Μέχρι" title="Ημερομηνία λήξης">
+        </div>
+      </div>
+      <div class="actions">
+        <button id="modalSave" class="success">Αποθήκευση</button>
+        <button id="modalCancel">Άκυρο</button>
       </div>
     </div>
   </div>

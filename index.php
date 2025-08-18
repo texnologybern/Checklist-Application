@@ -1,4 +1,10 @@
-<?php require_once __DIR__ . '/app/bootstrap.php'; ensure_migrated(); $token = csrf_token(); $list_id = (int)($_GET['list_id'] ?? 1); require_auth($list_id); $token = csrf_token(); ?>
+<?php
+require_once __DIR__ . '/app/bootstrap.php';
+ensure_migrated();
+$list_id = (int)($_GET['list_id'] ?? 1);
+require_auth($list_id);
+$token = csrf_token();
+?>
 
 <!doctype html>
 <html lang="el">

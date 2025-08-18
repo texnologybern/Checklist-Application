@@ -1,3 +1,6 @@
+Έτοιμο — έλυσα το conflict και ενοποίησα με το υπόλοιπο codebase: χωρίς inline `style`, άνοιγμα/κλείσιμο edit μέσω της κλάσης `editing` στο `<li>` και `body.editing-open`. Βάλε αυτό:
+
+```js
 import { el, els, API, LIST_ID } from './api.js';
 import { showConfirm } from './ui.js';
 import { applyFilters } from './filters.js';
@@ -54,7 +57,7 @@ export function taskItem(t){
       ${datesLine}
       ${renderChips(t.tags)}
 
-      <!-- ΝΕΟ: per-task notes με details/summary -->
+      <!-- Per-task notes -->
       <details class="taskNotes">
         <summary class="noteSummary">Σημειώσεις</summary>
         <div class="addNote">
@@ -64,7 +67,7 @@ export function taskItem(t){
         <div class="notesThread" data-loaded="0"></div>
       </details>
 
-      <div class="editForm" style="display:none">
+      <div class="editForm">
         <div class="row">
           <input class="editTitle" placeholder="Τίτλος" value="${escapeAttr(t.title)}">
           <textarea class="editDesc" placeholder="Περιγραφή">${escapeHtml(t.description || '')}</textarea>
@@ -92,6 +95,8 @@ export function taskItem(t){
       <button class="del" title="Διαγραφή">🗑️</button>
     </div>
   `;
+
+  // Toggle done
   el('input[type="checkbox"]', li).addEventListener('change', async e => {
     try {
       await API('toggle', { id: t.id, checked: e.target.checked });
@@ -100,6 +105,7 @@ export function taskItem(t){
     } catch (err) { alert(err.message); e.target.checked = !e.target.checked; }
   });
 
+  // Delete
   el('.del', li).addEventListener('click', () => {
     showConfirm('Διαγραφή εργασίας;', async () => {
       try { await API('delete', { id: t.id }); li.remove(); refreshProgress(); }
@@ -107,24 +113,26 @@ export function taskItem(t){
     });
   });
 
+  // Edit open/close
   const content = el('.content', li);
-  const editForm = el('.editForm', li);
+
   el('.edit', li).addEventListener('click', () => {
     content.querySelector('.titleRow').classList.add('hidden');
     content.querySelector('.desc').classList.add('hidden');
     const chips = content.querySelector('.chips'); if (chips) chips.classList.add('hidden');
-    editForm.style.display = 'block';
     li.classList.add('editing');
-    document.body.classList.add('editing-open');
+    document.body.classList.add('editing-open'); // κλείδωμα scroll σε mobile
   });
+
   el('.cancelEdit', li).addEventListener('click', () => {
     content.querySelector('.titleRow').classList.remove('hidden');
     content.querySelector('.desc').classList.remove('hidden');
     const chips = content.querySelector('.chips'); if (chips) chips.classList.remove('hidden');
-    editForm.style.display = 'none';
     li.classList.remove('editing');
-    document.body.classList.remove('editing-open');
+    document.body.classList.remove('editing-open'); // άνοιγμα scroll
   });
+
+  // Save
   el('.saveEdit', li).addEventListener('click', async () => {
     const title = el('.editTitle', li).value.trim();
     if (!title) { alert('Γράψε τίτλο'); return; }
@@ -141,20 +149,27 @@ export function taskItem(t){
       li.dataset.tags       = tags.toLowerCase();
       li.dataset.start_date = start_date || '';
       li.dataset.due_date   = due_date   || '';
+
       const oldBadge = el('.titleRow .badge', li); if (oldBadge) oldBadge.remove();
       el('.titleRow', li).insertAdjacentElement('beforeend', prioBadge(priority));
+
       const oldChips = el('.chips', li); if (oldChips) oldChips.remove();
-      el('.desc', li).insertAdjacentHTML('afterend', renderChips(tags));
       const oldDates = el('.dates', li); if (oldDates) oldDates.remove();
+
+      // Εισαγωγή με σωστή σειρά: dates πρώτα, μετά chips
       const datesLine = renderDates(start_date, due_date);
       el('.desc', li).insertAdjacentHTML('afterend', datesLine);
-      el('.cancelEdit', li).click();
+      el('.desc', li).insertAdjacentHTML('afterend', renderChips(tags));
+
+      el('.cancelEdit', li).click(); // κλείσιμο edit & αφαίρεση body.editing-open
       applyFilters();
     } catch (err) { alert(err.message); }
   });
 
+  // Notes init
   initNotes(li, t);
 
+  // Drag & drop
   li.addEventListener('dragstart', e => { li.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
   li.addEventListener('dragend',   async () => { li.classList.remove('dragging'); await sendOrder(); });
 
@@ -263,7 +278,7 @@ export function init(){
     });
   });
 
-  // Global notes toggle (από main)
+  // Global notes toggle
   const notesToggle = el('#notesToggle');
   const notesSection = el('#notesSection');
   if (notesToggle && notesSection){
@@ -273,3 +288,4 @@ export function init(){
     });
   }
 }
+```

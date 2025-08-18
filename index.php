@@ -101,7 +101,7 @@
 
   <div id="confirmModal" class="modal hidden">
     <div class="box">
-      <p>Να διαγραφούν όλες οι εργασίες; Η ενέργεια δεν αναιρείται.</p>
+      <p id="confirmText">Να διαγραφούν όλες οι εργασίες; Η ενέργεια δεν αναιρείται.</p>
       <div class="actions">
         <button id="confirmYes" class="danger">Διαγραφή</button>
         <button id="confirmNo">Άκυρο</button>

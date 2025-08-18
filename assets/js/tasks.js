@@ -1,3 +1,6 @@
+Έτοιμο — έλυσα το conflict και ενοποίησα με το υπόλοιπο codebase: χωρίς inline `style`, άνοιγμα/κλείσιμο edit μέσω της κλάσης `editing` στο `<li>` και `body.editing-open`. Βάλε αυτό:
+
+```js
 import { el, els, API, LIST_ID } from './api.js';
 import { showConfirm } from './ui.js';
 import { applyFilters } from './filters.js';
@@ -285,3 +288,4 @@ export function init(){
     });
   }
 }
+```

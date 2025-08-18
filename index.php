@@ -20,6 +20,10 @@
           <div class="subtitle">Συντήρηση & αναβαθμίσεις κατοικίας. Επιλέξτε τα κουτάκια για να σημειώσετε ό,τι ολοκληρώθηκε.</div>
         </div>
         <div class="toolbar">
+          <label class="themeSwitch" title="Αλλαγή θέματος">
+            <input type="checkbox" id="themeToggle" />
+            <span class="slider"></span>
+          </label>
           <button class="menuBtn" id="menuBtn">☰</button>
           <div class="toolbarButtons">
             <button class="primary" id="printBtn">🖨️ Εκτύπωση / PDF</button>

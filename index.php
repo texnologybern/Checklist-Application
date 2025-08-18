@@ -29,73 +29,77 @@
         </div>
       </header>
 
-      <div class="meta">
-        <div class="field"><label>Ημερομηνία</label><input id="dateField" placeholder="π.χ. 14/08/2025"></div>
-        <div class="field"><label>Υπεύθυνος</label><input id="ownerField" placeholder="π.χ. Γιώργος"></div>
-        <div class="field"><label>Τηλ. Επικοινωνίας</label><input id="phoneField" placeholder=""></div>
-        <div class="field"><label>Συνολική Πρόοδος</label><input id="progressField" readonly></div>
-      </div>
-
-      <div class="progressWrap">
-        <div class="progressLabel"><span>Πρόοδος εργασιών</span><span id="percentText">0%</span></div>
-        <div class="progress"><div class="bar" id="bar"></div></div>
-      </div>
-      
-      <div class="sectionTitle">Φίλτρα</div>
-      <div class="filters">
-        <input id="filterSearch" placeholder="Αναζήτηση τίτλου/περιγραφής">
-        <input id="filterTag" placeholder="Ετικέτα (π.χ. Ηλεκτρικά)">
-        <select id="filterPriority">
-          <option value="">Προτεραιότητα: Όλες</option>
-          <option value="1">Υψηλή</option>
-          <option value="2">Μεσαία</option>
-          <option value="3">Χαμηλή</option>
-        </select>
-        <input type="date" id="filterFrom" title="Από" placeholder="Από">
-        <input type="date" id="filterTo" title="Μέχρι" placeholder="Μέχρι">
-        <select id="sortDate">
-          <option value="">Ταξινόμηση: Καμία</option>
-          <option value="start_asc">Από ↑</option>
-          <option value="start_desc">Από ↓</option>
-          <option value="due_asc">Μέχρι ↑</option>
-          <option value="due_desc">Μέχρι ↓</option>
-        </select>
-        <label class="onlyPending"><input type="checkbox" id="filterPending"> Μόνο εκκρεμή</label>
-      </div>
-
-      <div class="sectionTitle">Προσθήκη νέας εργασίας</div>
-      <div class="addForm">
-        <input id="addTitle" placeholder="Τίτλος (π.χ. Βάψιμο υπνοδωματίου)">
-        <textarea id="addDesc" placeholder="Σύντομη περιγραφή"></textarea>
-        <select id="addPriority" title="Προτεραιότητα">
-          <option value="2" selected>Μεσαία</option>
-          <option value="1">Υψηλή</option>
-          <option value="3">Χαμηλή</option>
-        </select>
-        <input id="addTags" placeholder="Ετικέτες (π.χ. Ηλεκτρικά,Μπάνιο)">
-        <div class="dateInputs">
-          <input id="addStart" type="date" placeholder="Από" title="Ημερομηνία αρχής">
-          <input id="addDue" type="date" placeholder="Μέχρι" title="Ημερομηνία λήξης">
+      <main class="task-area">
+        <div class="meta">
+          <div class="field"><label>Ημερομηνία</label><input id="dateField" placeholder="π.χ. 14/08/2025"></div>
+          <div class="field"><label>Υπεύθυνος</label><input id="ownerField" placeholder="π.χ. Γιώργος"></div>
+          <div class="field"><label>Τηλ. Επικοινωνίας</label><input id="phoneField" placeholder=""></div>
+          <div class="field"><label>Συνολική Πρόοδος</label><input id="progressField" readonly></div>
         </div>
-        <button class="success" id="addBtn">+ Προσθήκη</button>
-      </div>
 
-      <div class="sectionTitle">Εργασίες</div>
-      <ul class="tasks" id="taskList"></ul>
+        <div class="progressWrap">
+          <div class="progressLabel"><span>Πρόοδος εργασιών</span><span id="percentText">0%</span></div>
+          <div class="progress"><div class="bar" id="bar"></div></div>
+        </div>
 
-      <!-- ✅ Notes section from main -->
-      <div class="sectionTitle notesHeader">
-        <span>Συνολικές Σημειώσεις</span>
-        <button id="notesToggle" aria-expanded="false">⮟</button>
-      </div>
-      <div class="notesWrap hidden" id="notesSection">
-        <textarea id="notes" placeholder="Γενικές παρατηρήσεις, ημερολόγιο εργασιών, εκκρεμότητες."></textarea>
-        <textarea id="materials" placeholder="Υλικά προς αγορά / παραγγελίες."></textarea>
-      </div>
+        <div class="sectionTitle">Εργασίες</div>
+        <ul class="tasks" id="taskList"></ul>
 
-      <footer>
-        Συμβουλή: Κάντε κλικ στο «Εκτύπωση / PDF» για να αποθηκεύσετε την τρέχουσα κατάσταση ως PDF.
-      </footer>
+        <!-- ✅ Notes section from main -->
+        <div class="sectionTitle notesHeader">
+          <span>Συνολικές Σημειώσεις</span>
+          <button id="notesToggle" aria-expanded="false">⮟</button>
+        </div>
+        <div class="notesWrap hidden" id="notesSection">
+          <textarea id="notes" placeholder="Γενικές παρατηρήσεις, ημερολόγιο εργασιών, εκκρεμότητες."></textarea>
+          <textarea id="materials" placeholder="Υλικά προς αγορά / παραγγελίες."></textarea>
+        </div>
+
+        <footer>
+          Συμβουλή: Κάντε κλικ στο «Εκτύπωση / PDF» για να αποθηκεύσετε την τρέχουσα κατάσταση ως PDF.
+        </footer>
+      </main>
+
+      <aside class="sidebar">
+        <div class="sectionTitle">Φίλτρα</div>
+        <div class="filters">
+          <input id="filterSearch" placeholder="Αναζήτηση τίτλου/περιγραφής">
+          <input id="filterTag" placeholder="Ετικέτα (π.χ. Ηλεκτρικά)">
+          <select id="filterPriority">
+            <option value="">Προτεραιότητα: Όλες</option>
+            <option value="1">Υψηλή</option>
+            <option value="2">Μεσαία</option>
+            <option value="3">Χαμηλή</option>
+          </select>
+          <input type="date" id="filterFrom" title="Από" placeholder="Από">
+          <input type="date" id="filterTo" title="Μέχρι" placeholder="Μέχρι">
+          <select id="sortDate">
+            <option value="">Ταξινόμηση: Καμία</option>
+            <option value="start_asc">Από ↑</option>
+            <option value="start_desc">Από ↓</option>
+            <option value="due_asc">Μέχρι ↑</option>
+            <option value="due_desc">Μέχρι ↓</option>
+          </select>
+          <label class="onlyPending"><input type="checkbox" id="filterPending"> Μόνο εκκρεμή</label>
+        </div>
+
+        <div class="sectionTitle">Προσθήκη νέας εργασίας</div>
+        <div class="addForm">
+          <input id="addTitle" placeholder="Τίτλος (π.χ. Βάψιμο υπνοδωματίου)">
+          <textarea id="addDesc" placeholder="Σύντομη περιγραφή"></textarea>
+          <select id="addPriority" title="Προτεραιότητα">
+            <option value="2" selected>Μεσαία</option>
+            <option value="1">Υψηλή</option>
+            <option value="3">Χαμηλή</option>
+          </select>
+          <input id="addTags" placeholder="Ετικέτες (π.χ. Ηλεκτρικά,Μπάνιο)">
+          <div class="dateInputs">
+            <input id="addStart" type="date" placeholder="Από" title="Ημερομηνία αρχής">
+            <input id="addDue" type="date" placeholder="Μέχρι" title="Ημερομηνία λήξης">
+          </div>
+          <button class="success" id="addBtn">+ Προσθήκη</button>
+        </div>
+      </aside>
     </div>
   </div>
 

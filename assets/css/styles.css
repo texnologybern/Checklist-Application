@@ -7,6 +7,7 @@
   --accent2:#10b981;
   --border:#e2e8f0;
   --shadow:0 10px 30px rgba(2,6,23,.08);
+  --switch-handle:#fff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,6 +20,7 @@
     --accent2:#34d399;
     --border:#334155;
     --shadow:0 10px 30px rgba(0,0,0,.5);
+    --switch-handle:#f1f5f9;
   }
 }
 
@@ -31,6 +33,7 @@
   --accent2:#34d399;
   --border:#334155;
   --shadow:0 10px 30px rgba(0,0,0,.5);
+  --switch-handle:#f1f5f9;
 }
 
 :root[data-theme='light'] {
@@ -42,10 +45,12 @@
   --accent2:#10b981;
   --border:#e2e8f0;
   --shadow:0 10px 30px rgba(2,6,23,.08);
+  --switch-handle:#fff;
 }
 
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";color:var(--ink);background:var(--bg)}
+input,textarea,select{color:var(--ink)}
 body.editing-open{overflow:hidden;}
 
 .page{max-width:980px;margin:40px auto;padding:24px;width:100%}
@@ -58,11 +63,11 @@ header{padding:28px 28px 10px 28px;display:grid;grid-template-columns:1fr auto;g
 .themeSwitch{position:relative;display:inline-block;width:46px;height:24px}
 .themeSwitch input{opacity:0;width:0;height:0}
 .themeSwitch .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--border);transition:background .2s;border-radius:34px}
-.themeSwitch .slider:before{position:absolute;content:"";height:20px;width:20px;left:2px;bottom:2px;background:var(--card);border-radius:50%;transition:transform .2s;box-shadow:var(--shadow)}
+.themeSwitch .slider:before{position:absolute;content:"";height:20px;width:20px;left:2px;bottom:2px;background:var(--switch-handle);border-radius:50%;transition:transform .2s;box-shadow:var(--shadow)}
 .themeSwitch input:checked+.slider{background:var(--accent)}
 .themeSwitch input:checked+.slider:before{transform:translateX(22px)}
 .menuBtn{display:none;border:1px solid var(--border);background:var(--card);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:600;box-shadow:var(--shadow)}
-button{border:1px solid var(--border);background:var(--card);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:600;box-shadow:var(--shadow);transition:background-color .2s,color .2s,transform .1s}
+button{border:1px solid var(--border);background:var(--card);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:600;color:var(--ink);box-shadow:var(--shadow);transition:background-color .2s,color .2s,transform .1s}
 button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
 button.success{background:var(--accent2);color:#fff;border-color:var(--accent2)}
 button.danger{background:#ef4444;color:#fff;border-color:#ef4444}

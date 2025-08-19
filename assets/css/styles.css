@@ -296,12 +296,19 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 .editBtns{ display:flex; gap:8px; justify-content:flex-end; }
 
 /* Notes thread */
-.taskNotes{ margin-top:6px; }
+.taskNotes{ margin-top:6px; overflow:hidden; }
 .taskNotes summary{ cursor:pointer; display:flex; align-items:center; justify-content:space-between; font-weight:600; }
 .taskNotes summary::-webkit-details-marker{ display:none; }
 .taskNotes summary::marker{ content:""; }
 .taskNotes summary::after{ content:'▼'; font-size:14px; transition:transform .2s; }
 .taskNotes[open] summary::after{ transform:rotate(180deg); }
+
+/* Smooth expand/collapse for notes */
+.taskNotes .addNote,
+.taskNotes .notesThread{ max-height:0; opacity:0; overflow:hidden; transition:max-height .25s ease, opacity .25s ease; }
+.taskNotes.opening .addNote,
+.taskNotes.opening .notesThread{ max-height:500px; opacity:1; }
+
 .addNote{ margin-top:6px; display:flex; gap:8px; }
 
 .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;animation:fadeIn .25s;z-index:200;}

@@ -22,6 +22,7 @@ export function initNotes(li, task){
   const thread  = el('.notesThread', li);
   const wrapper = el('.taskNotes', li);      // <details>
   const noteInput = el('.noteText', li);     // ✅ Codex change
+  const summary = el('summary', wrapper);
 
   const ensureLoaded = async () => {
     if (thread.dataset.loaded === '1') return;
@@ -40,8 +41,24 @@ export function initNotes(li, task){
   // Όταν ανοίγει το <details>, φόρτωσε & εστίασε στο input
   wrapper?.addEventListener('toggle', () => {
     if (wrapper.open){
+      wrapper.classList.add('opening');
       ensureLoaded();
       noteInput?.focus();
+    } else {
+      wrapper.classList.remove('opening');
+    }
+  });
+
+  // Απαλή κατάρρευση όταν κλείνει
+  summary?.addEventListener('click', (e) => {
+    if (wrapper.open){
+      e.preventDefault();
+      wrapper.classList.remove('opening');
+      const onEnd = () => {
+        wrapper.open = false;
+      };
+      const target = el('.notesThread', wrapper);
+      target?.addEventListener('transitionend', onEnd, { once:true });
     }
   });
 

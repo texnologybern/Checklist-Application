@@ -142,6 +142,7 @@ button.fab{display:none;width:56px;height:56px;border-radius:50%;background:var(
   .toolbar.open .toolbarButtons{display:flex}
   .menuBtn{display:block}
 }
+
 @media (max-width:480px){
   .page{padding:clamp(12px,5vw,20px)}
   .meta{grid-template-columns:1fr;padding:0 clamp(12px,5vw,20px) 18px}
@@ -156,6 +157,7 @@ button.fab{display:none;width:56px;height:56px;border-radius:50%;background:var(
   .task{grid-template-columns:26px 28px minmax(0,1fr) auto;gap:8px;padding:clamp(14px,5vw,22px)}
   .task label{font-size:clamp(1rem,4.5vw,1.25rem)}
   .task .desc,.task .note{font-size:clamp(.875rem,3.8vw,1rem)}
+  /* Codex mobile tweaks (resolved) */
   .task .dates{flex-direction:column;align-items:flex-start}
   .task .dates .sep{display:none}
   *,*::before,*::after{transition:none !important;animation:none !important}
@@ -320,7 +322,6 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
   will-change: max-height, opacity, transform;
   */
 }
-
 .task .editForm.open{
   max-height:1000px; /* αρκετά μεγάλο για το περιεχόμενο */
   opacity:1;

@@ -28,6 +28,16 @@ function table_exists(PDO $pdo, string $table): bool {
   try { $pdo->query("SELECT 1 FROM `$table` LIMIT 1"); return true; }
   catch (Throwable $e) { return false; }
 }
+function norm_dt(?string $s): ?string {
+  if ($s === null || $s === '') return null;
+  $d = date_create($s);
+  return $d ? $d->format('Y-m-d H:i:s') : null;
+}
+function fmt_dt(?string $s): ?string {
+  if ($s === null || $s === '') return null;
+  $d = date_create($s);
+  return $d ? $d->format('Y-m-d\TH:i') : null;
+}
 function progress(PDO $pdo, int $list_id): array {
   $s = $pdo->prepare('SELECT SUM(checked) AS done, COUNT(*) AS total FROM tasks WHERE list_id=?');
   $s->execute([$list_id]); $r = $s->fetch();
@@ -63,7 +73,12 @@ try {
       $q = $pdo->prepare($sel);
       $q->execute([$list_id]);
       $tasks = $q->fetchAll();
-      foreach ($tasks as &$t) { $t['checked'] = (int)$t['checked']; $t['priority'] = (int)$t['priority']; }
+      foreach ($tasks as &$t) {
+        $t['checked'] = (int)$t['checked'];
+        $t['priority'] = (int)$t['priority'];
+        if (isset($t['start_date'])) $t['start_date'] = fmt_dt($t['start_date']);
+        if (isset($t['due_date']))   $t['due_date']   = fmt_dt($t['due_date']);
+      }
 
       $q2 = $pdo->prepare('SELECT id,name,location,date_label,owner,phone,notes,materials FROM lists WHERE id=?');
       $q2->execute([$list_id]); $meta = $q2->fetch() ?: [];
@@ -103,8 +118,8 @@ try {
       $desc  = trim((string)($b['description'] ?? ''));
       $prio  = (int)($b['priority'] ?? 2); if ($prio<1 || $prio>3) $prio = 2;
       $tags  = trim((string)($b['tags'] ?? ''));
-      $start = trim((string)($b['start_date'] ?? '')) ?: null;
-      $due   = trim((string)($b['due_date']   ?? '')) ?: null;
+      $start = norm_dt(trim((string)($b['start_date'] ?? '')) ?: null);
+      $due   = norm_dt(trim((string)($b['due_date']   ?? '')) ?: null);
 
       $posS = $pdo->prepare('SELECT COALESCE(MAX(position),0)+1 FROM tasks WHERE list_id=?');
       $posS->execute([$list_id]); $pos = (int)$posS->fetchColumn();
@@ -132,6 +147,8 @@ try {
       $task = $tq->fetch();
       $task['checked']  = (int)$task['checked'];
       $task['priority'] = (int)$task['priority'];
+      if (isset($task['start_date'])) $task['start_date'] = fmt_dt($task['start_date']);
+      if (isset($task['due_date']))   $task['due_date']   = fmt_dt($task['due_date']);
 
       j(['ok'=>true,'task'=>$task]);
     }
@@ -144,8 +161,8 @@ try {
       $desc = trim((string)($b['description'] ?? ''));
       $prio = (int)($b['priority'] ?? 2); if ($prio<1 || $prio>3) $prio = 2;
       $tags = trim((string)($b['tags'] ?? ''));
-      $start = trim((string)($b['start_date'] ?? '')) ?: null;
-      $due   = trim((string)($b['due_date']   ?? '')) ?: null;
+      $start = norm_dt(trim((string)($b['start_date'] ?? '')) ?: null);
+      $due   = norm_dt(trim((string)($b['due_date']   ?? '')) ?: null);
 
       if ($id<=0 || $title==='') j(['ok'=>false,'error'=>'Invalid data'],400);
 
@@ -190,9 +207,9 @@ try {
       foreach ($ids as $id) {
         $st->execute([$pos++, $id, $list_id]);
         if ($stDate && isset($dates[$id])) {
-          $sd = $dates[$id]['start_date'] ?? null;
-          $dd = $dates[$id]['due_date']   ?? null;
-          $stDate->execute([$sd ?: null, $dd ?: null, $id, $list_id]);
+          $sd = norm_dt($dates[$id]['start_date'] ?? null);
+          $dd = norm_dt($dates[$id]['due_date']   ?? null);
+          $stDate->execute([$sd, $dd, $id, $list_id]);
         }
       }
       $pdo->commit();

@@ -8,7 +8,11 @@ let BOOT = null;
 
 function escapeHtml(s){ return (s||'').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
 function escapeAttr(s){ return (s||'').replace(/"/g, '&quot;'); }
-const fmtDate = d => new Date(d).toLocaleDateString('el-GR', { day:'2-digit', month:'2-digit' });
+const fmtDate = d => {
+  if (!d) return '';
+  const dt = new Date(d);
+  return dt.toLocaleString('el-GR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+};
 
 function prioBadge(p){
   const map = {1:'Υψηλή',2:'Μεσαία',3:'Χαμηλή'};
@@ -96,8 +100,8 @@ export function taskItem(t){
             </select>
           </div>
           <div class="dateInputs">
-            <input class="editStart" type="date" value="${escapeAttr(t.start_date || '')}" placeholder="Από" title="Ημερομηνία αρχής">
-            <input class="editDue" type="date"   value="${escapeAttr(t.due_date   || '')}" placeholder="Μέχρι" title="Ημερομηνία λήξης">
+            <input class="editStart" type="datetime-local" value="${escapeAttr(t.start_date || '')}" placeholder="Από" title="Ημερομηνία αρχής">
+            <input class="editDue" type="datetime-local"   value="${escapeAttr(t.due_date   || '')}" placeholder="Μέχρι" title="Ημερομηνία λήξης">
           </div>
           <div class="editBtns">
             <button class="saveEdit success">Αποθήκευση</button>

@@ -59,10 +59,19 @@ function ensure_task_enhancements(PDO $pdo): void {
 }
 
 function ensure_task_dates(PDO $pdo): void {
-  try { $pdo->query('SELECT start_date FROM tasks LIMIT 1'); }
-  catch (Throwable $e) { $pdo->exec("ALTER TABLE tasks ADD COLUMN start_date DATE NULL AFTER tags"); }
-  try { $pdo->query('SELECT due_date FROM tasks LIMIT 1'); }
-  catch (Throwable $e) { $pdo->exec("ALTER TABLE tasks ADD COLUMN due_date DATE NULL AFTER start_date"); }
+  $col = $pdo->query("SHOW COLUMNS FROM tasks LIKE 'start_date'")->fetch(PDO::FETCH_ASSOC);
+  if (!$col) {
+    $pdo->exec("ALTER TABLE tasks ADD COLUMN start_date DATETIME NULL AFTER tags");
+  } elseif (stripos((string)$col['Type'], 'datetime') === false) {
+    $pdo->exec("ALTER TABLE tasks MODIFY start_date DATETIME NULL");
+  }
+
+  $col = $pdo->query("SHOW COLUMNS FROM tasks LIKE 'due_date'")->fetch(PDO::FETCH_ASSOC);
+  if (!$col) {
+    $pdo->exec("ALTER TABLE tasks ADD COLUMN due_date DATETIME NULL AFTER start_date");
+  } elseif (stripos((string)$col['Type'], 'datetime') === false) {
+    $pdo->exec("ALTER TABLE tasks MODIFY due_date DATETIME NULL");
+  }
 }
 
 function csrf_token(): string {

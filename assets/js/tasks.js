@@ -29,6 +29,28 @@ function renderDates(start, due){
   return '';
 }
 
+function hideWithFade(el){
+  if (!el) return;
+  el.classList.add('fade');
+  requestAnimationFrame(() => el.classList.add('fade-out'));
+  el.addEventListener('transitionend', function handler(){
+    el.classList.add('hidden');
+    el.classList.remove('fade', 'fade-out');
+    el.removeEventListener('transitionend', handler);
+  }, { once:true });
+}
+
+function showWithFade(el){
+  if (!el) return;
+  el.classList.remove('hidden');
+  el.classList.add('fade', 'fade-out');
+  requestAnimationFrame(() => el.classList.remove('fade-out'));
+  el.addEventListener('transitionend', function handler(){
+    el.classList.remove('fade');
+    el.removeEventListener('transitionend', handler);
+  }, { once:true });
+}
+
 export function taskItem(t){
   const li = document.createElement('li');
   li.className = 'task';
@@ -108,17 +130,19 @@ export function taskItem(t){
   const content = el('.content', li);
 
   el('.edit', li).addEventListener('click', () => {
-    content.querySelector('.titleRow').classList.add('hidden');
-    content.querySelector('.desc').classList.add('hidden');
-    const chips = content.querySelector('.chips'); if (chips) chips.classList.add('hidden');
+    hideWithFade(content.querySelector('.titleRow'));
+    hideWithFade(content.querySelector('.desc'));
+    const chips = content.querySelector('.chips'); if (chips) hideWithFade(chips);
+    el('.editForm', li).classList.add('open');
     li.classList.add('editing');
     document.body.classList.add('editing-open');
   });
 
   el('.cancelEdit', li).addEventListener('click', () => {
-    content.querySelector('.titleRow').classList.remove('hidden');
-    content.querySelector('.desc').classList.remove('hidden');
-    const chips = content.querySelector('.chips'); if (chips) chips.classList.remove('hidden');
+    showWithFade(content.querySelector('.titleRow'));
+    showWithFade(content.querySelector('.desc'));
+    const chips = content.querySelector('.chips'); if (chips) showWithFade(chips);
+    el('.editForm', li).classList.remove('open');
     li.classList.remove('editing');
     document.body.classList.remove('editing-open');
   });

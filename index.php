@@ -78,8 +78,8 @@
               <option value="2">Μεσαία</option>
               <option value="3">Χαμηλή</option>
             </select>
-            <input type="date" id="filterFrom" title="Από" placeholder="Από">
-            <input type="date" id="filterTo" title="Μέχρι" placeholder="Μέχρι">
+            <input type="datetime-local" id="filterFrom" title="Από" placeholder="Από">
+            <input type="datetime-local" id="filterTo" title="Μέχρι" placeholder="Μέχρι">
             <select id="sortDate">
               <option value="">Ταξινόμηση: Καμία</option>
               <option value="start_asc">Από ↑</option>
@@ -103,8 +103,8 @@
         </select>
         <input id="addTags" placeholder="Ετικέτες (π.χ. Ηλεκτρικά,Μπάνιο)">
         <div class="dateInputs">
-          <input id="addStart" type="date" placeholder="Από" title="Ημερομηνία αρχής">
-          <input id="addDue" type="date" placeholder="Μέχρι" title="Ημερομηνία λήξης">
+          <input id="addStart" type="datetime-local" placeholder="Από" title="Ημερομηνία αρχής">
+          <input id="addDue" type="datetime-local" placeholder="Μέχρι" title="Ημερομηνία λήξης">
         </div>
         <button class="success" id="addBtn">+ Προσθήκη</button>
       </div>
@@ -137,8 +137,8 @@
         </select>
         <input id="modalTags" placeholder="Ετικέτες (π.χ. Ηλεκτρικά,Μπάνιο)">
         <div class="dateInputs">
-          <input id="modalStart" type="date" placeholder="Από" title="Ημερομηνία αρχής">
-          <input id="modalDue" type="date" placeholder="Μέχρι" title="Ημερομηνία λήξης">
+          <input id="modalStart" type="datetime-local" placeholder="Από" title="Ημερομηνία αρχής">
+          <input id="modalDue" type="datetime-local" placeholder="Μέχρι" title="Ημερομηνία λήξης">
         </div>
       </div>
       <div class="actions">

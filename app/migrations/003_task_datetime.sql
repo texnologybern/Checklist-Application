@@ -1,0 +1,3 @@
+ALTER TABLE tasks
+  MODIFY start_date DATETIME NULL,
+  MODIFY due_date   DATETIME NULL;

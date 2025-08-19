@@ -290,6 +290,7 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 .fade{ transition:opacity .2s ease, transform .2s ease; }
 .fade.fade-out{ opacity:0; transform:translateY(-4px); }
 
+/* Edit form (merged, smooth expand/collapse) */
 .task .editForm{
   border:1px dashed var(--border);
   background:var(--card);
@@ -301,15 +302,19 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
   margin-top:0;
   padding:0 10px;
   transition:max-height .2s ease, opacity .2s ease, transform .2s ease, margin-top .2s ease, padding .2s ease;
+  /* προαιρετικό:
+  will-change: max-height, opacity, transform;
+  */
 }
 
 .task .editForm.open{
-  max-height:1000px;
+  max-height:1000px; /* αρκετά μεγάλο για το περιεχόμενο */
   opacity:1;
   transform:scale(1);
   margin-top:6px;
   padding:10px;
 }
+
 .editForm .row{ display:grid; grid-template-columns:1fr; gap:8px; }
 .editForm input, .editForm textarea, .editForm select{ border:1px solid var(--border); border-radius:10px; padding:10px; width:100%; }
 .editForm select{-webkit-appearance:none;appearance:none;padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23677389' d='M5 6L0 0h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:10px}
@@ -319,7 +324,8 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 .editBtns{ display:flex; gap:8px; justify-content:flex-end; }
 
 /* Notes thread */
-.taskNotes{ margin-top:6px; overflow:hidden; }
+.taskNotes{ margin-top:6px; }
+.taskNotes:not([open]){ overflow:hidden; }
 .taskNotes summary{ cursor:pointer; display:flex; align-items:center; justify-content:space-between; font-weight:600; }
 .taskNotes summary::-webkit-details-marker{ display:none; }
 .taskNotes summary::marker{ content:""; }
@@ -330,7 +336,7 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 .taskNotes .addNote,
 .taskNotes .notesThread{ max-height:0; opacity:0; overflow:hidden; transition:max-height .25s ease, opacity .25s ease; }
 .taskNotes.opening .addNote,
-.taskNotes.opening .notesThread{ max-height:500px; opacity:1; }
+.taskNotes.opening .notesThread{ max-height:1000px; opacity:1; }
 
 .addNote{ margin-top:6px; display:flex; gap:8px; }
 

@@ -142,6 +142,7 @@ button.fab{display:none;width:56px;height:56px;border-radius:50%;background:var(
   .toolbar.open .toolbarButtons{display:flex}
   .menuBtn{display:block}
 }
+
 @media (max-width:480px){
   .page{padding:clamp(12px,5vw,20px)}
   .meta{grid-template-columns:1fr;padding:0 clamp(12px,5vw,20px) 18px}
@@ -156,6 +157,10 @@ button.fab{display:none;width:56px;height:56px;border-radius:50%;background:var(
   .task{grid-template-columns:26px 28px minmax(0,1fr) auto;gap:8px;padding:clamp(14px,5vw,22px)}
   .task label{font-size:clamp(1rem,4.5vw,1.25rem)}
   .task .desc,.task .note{font-size:clamp(.875rem,3.8vw,1rem)}
+  /* Codex mobile tweaks (resolved) */
+  .task .dates{flex-direction:column;align-items:flex-start}
+  .task .dates .sep{display:none}
+  *,*::before,*::after{transition:none !important;animation:none !important}
   /* Full-screen editor on mobile */
   .task.editing{
     grid-template-columns:1fr;
@@ -276,7 +281,16 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
 .task.done label{ color:var(--muted); text-decoration: line-through; }
 
 /* Task dates */
-.task .dates{ font-size:12px; color:var(--muted); margin-top:4px; }
+.task .dates{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  font-size:12px;
+  color:var(--muted);
+  margin-top:4px;
+}
+.task .dates::before{ content:'📅'; }
+.task .dates .sep{ margin:0 2px; }
 .task .dates .due{ color:var(--accent); font-weight:600; }
 
 /* Editing state */
@@ -308,7 +322,6 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
   will-change: max-height, opacity, transform;
   */
 }
-
 .task .editForm.open{
   max-height:1000px; /* αρκετά μεγάλο για το περιεχόμενο */
   opacity:1;

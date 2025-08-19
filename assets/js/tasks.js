@@ -27,9 +27,9 @@ function renderChips(tags){
   return '<div class="chips">' + parts.map(t => `<span class="chip">${escapeHtml(t)}</span>`).join('') + '</div>';
 }
 function renderDates(start, due){
-  if (start && due) return `<div class="dates">📅 <span class="start">${escapeHtml(fmtDate(start))}</span> → <span class="due">${escapeHtml(fmtDate(due))}</span></div>`;
-  if (start)       return `<div class="dates">📅 Από <span class="start">${escapeHtml(fmtDate(start))}</span></div>`;
-  if (due)         return `<div class="dates">📅 Μέχρι <span class="due">${escapeHtml(fmtDate(due))}</span></div>`;
+  if (start && due) return `<div class="dates"><span class="start">${escapeHtml(fmtDate(start))}</span><span class="sep">→</span><span class="due">${escapeHtml(fmtDate(due))}</span></div>`;
+  if (start)       return `<div class="dates"><span class="start">Από ${escapeHtml(fmtDate(start))}</span></div>`;
+  if (due)         return `<div class="dates"><span class="due">Μέχρι ${escapeHtml(fmtDate(due))}</span></div>`;
   return '';
 }
 

@@ -58,43 +58,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title><?= htmlspecialchars($mode === 'login' ? 'Σύνδεση' : 'Ορισμός κωδικού') ?> – <?= htmlspecialchars($list_name) ?></title>
+  <title><?= htmlspecialchars($mode === 'login' ? 'Σύνδεση' : 'Ορισμός κωδικού', ENT_QUOTES) ?> – <?= htmlspecialchars($list_name, ENT_QUOTES) ?></title>
   <link rel="stylesheet" href="assets/css/styles.css" />
   <link rel="stylesheet" href="assets/css/login.css" />
 </head>
 <body class="login">
   <div class="card">
-      <header>
-        <div>
-          <div class="title"><?= htmlspecialchars($list_name) ?></div>
-          <div class="subtitle"><?= $mode === 'login' ? 'Πληκτρολογήστε τον κωδικό πρόσβασης για να δείτε τη λίστα.' : 'Ορίστε έναν αρχικό κωδικό πρόσβασης για τη λίστα.' ?></div>
+    <header>
+      <div>
+        <div class="title"><?= htmlspecialchars($list_name, ENT_QUOTES) ?></div>
+        <div class="subtitle">
+          <?= $mode === 'login'
+            ? 'Πληκτρολογήστε τον κωδικό πρόσβασης για να δείτε τη λίστα.'
+            : 'Ορίστε έναν αρχικό κωδικό πρόσβασης για τη λίστα.' ?>
         </div>
-      </header>
+      </div>
+    </header>
 
-      <?php if ($error): ?>
-        <div class="error"><?= htmlspecialchars($error) ?></div>
+    <?php if ($error): ?>
+      <div class="error"><?= htmlspecialchars($error, ENT_QUOTES) ?></div>
+    <?php endif; ?>
+
+    <form method="post" class="meta">
+      <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
+      <input type="hidden" name="list_id" value="<?= (int)$list_id ?>">
+
+      <div class="field">
+        <label><?= $mode === 'login' ? 'Κωδικός πρόσβασης' : 'Νέος κωδικός πρόσβασης' ?></label>
+        <input type="password" name="password" required autofocus autocomplete="<?= $mode === 'login' ? 'current-password' : 'new-password' ?>">
+      </div>
+
+      <?php if ($mode === 'setup'): ?>
+        <div class="field">
+          <label>Επιβεβαίωση κωδικού</label>
+          <input type="password" name="password2" required autocomplete="new-password">
+        </div>
       <?php endif; ?>
 
-        <form method="post" class="meta">
-        <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
-        <input type="hidden" name="list_id" value="<?= (int)$list_id ?>">
-
-          <div class="field">
-          <label><?= $mode === 'login' ? 'Κωδικός πρόσβασης' : 'Νέος κωδικός πρόσβασης' ?></label>
-          <input type="password" name="password" required autofocus autocomplete="<?= $mode === 'login' ? 'current-password' : 'new-password' ?>">
-        </div>
-
-        <?php if ($mode === 'setup'): ?>
-          <div class="field">
-            <label>Επιβεβαίωση κωδικού</label>
-            <input type="password" name="password2" required autocomplete="new-password">
-          </div>
-        <?php endif; ?>
-
-          <div class="toolbar">
-          <button class="success" type="submit"><?= $mode === 'login' ? 'Σύνδεση' : 'Αποθήκευση κωδικού' ?></button>
-        </div>
-      </form>
-    </div>
+      <div class="toolbar">
+        <button class="success" type="submit"><?= $mode === 'login' ? 'Σύνδεση' : 'Αποθήκευση κωδικού' ?></button>
+      </div>
+    </form>
+  </div>
 </body>
 </html>

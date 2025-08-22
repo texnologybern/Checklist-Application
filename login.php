@@ -60,14 +60,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title><?= htmlspecialchars($mode === 'login' ? 'Σύνδεση' : 'Ορισμός κωδικού') ?> – <?= htmlspecialchars($list_name) ?></title>
   <link rel="stylesheet" href="assets/css/styles.css" />
-  <style>
-    .card { max-width: 560px; margin: 60px auto; }
-    .field input { border: 1px solid var(--border); background: #fff; border-radius: 12px; padding: 12px; width: 100%; }
-    .error { color: #b91c1c; background: #fee2e2; border: 1px solid #fecaca; padding: 10px 12px; border-radius: 12px; margin: 0 28px 14px; }
-    .toolbar { justify-content: flex-end; }
-  </style>
+  <link rel="stylesheet" href="assets/css/login.css" />
 </head>
-<body>
+<body class="login">
   <div class="page">
     <div class="card">
       <header>
@@ -81,23 +76,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="error"><?= htmlspecialchars($error) ?></div>
       <?php endif; ?>
 
-      <form method="post" class="meta" style="grid-template-columns: 1fr;">
+        <form method="post" class="meta">
         <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
         <input type="hidden" name="list_id" value="<?= (int)$list_id ?>">
 
-        <div class="field">
+          <div class="field">
           <label><?= $mode === 'login' ? 'Κωδικός πρόσβασης' : 'Νέος κωδικός πρόσβασης' ?></label>
-          <input type="password" name="password" required>
+          <input type="password" name="password" required autofocus autocomplete="<?= $mode === 'login' ? 'current-password' : 'new-password' ?>">
         </div>
 
         <?php if ($mode === 'setup'): ?>
           <div class="field">
             <label>Επιβεβαίωση κωδικού</label>
-            <input type="password" name="password2" required>
+            <input type="password" name="password2" required autocomplete="new-password">
           </div>
         <?php endif; ?>
 
-        <div class="toolbar" style="padding: 0 28px 24px;">
+          <div class="toolbar">
           <button class="success" type="submit"><?= $mode === 'login' ? 'Σύνδεση' : 'Αποθήκευση κωδικού' ?></button>
         </div>
       </form>

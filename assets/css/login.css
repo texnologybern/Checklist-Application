@@ -22,8 +22,11 @@ body.login .card {
   margin: 0;
 }
 
-body.login .meta {
-  grid-template-columns: 1fr;
+body.login .login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0 28px 24px;
 }
 
 body.login .field {
@@ -50,7 +53,6 @@ body.login .error {
 
 body.login .toolbar {
   justify-content: flex-end;
-  padding: 0 28px 24px;
 }
 
 @media (max-width: 768px) {
@@ -66,7 +68,7 @@ body.login .toolbar {
   body.login .error {
     margin: 0 20px 14px;
   }
-  body.login .toolbar {
+  body.login .login-form {
     padding: 0 20px 24px;
   }
 }
@@ -74,5 +76,8 @@ body.login .toolbar {
 @media (max-width: 480px) {
   body.login {
     padding: clamp(12px, 5vw, 20px);
+  }
+  body.login .login-form {
+    padding: 0 clamp(12px, 5vw, 20px) 24px;
   }
 }

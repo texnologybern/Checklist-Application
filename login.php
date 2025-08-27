@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <div class="error"><?= htmlspecialchars($error, ENT_QUOTES) ?></div>
     <?php endif; ?>
 
-    <form method="post" class="meta">
+    <form method="post" class="login-form">
       <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
       <input type="hidden" name="list_id" value="<?= (int)$list_id ?>">
 

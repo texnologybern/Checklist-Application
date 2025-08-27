@@ -53,6 +53,24 @@ body.login .toolbar {
   padding: 0 28px 24px;
 }
 
+@media (max-width: 768px) {
+  body.login {
+    padding: 20px;
+  }
+  body.login header .title {
+    font-size: 24px;
+  }
+  body.login header .subtitle {
+    font-size: 13px;
+  }
+  body.login .error {
+    margin: 0 20px 14px;
+  }
+  body.login .toolbar {
+    padding: 0 20px 24px;
+  }
+}
+
 @media (max-width: 480px) {
   body.login {
     padding: clamp(12px, 5vw, 20px);

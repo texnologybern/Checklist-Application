@@ -84,14 +84,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <input type="hidden" name="list_id" value="<?= (int)$list_id ?>">
 
       <div class="field">
-        <label><?= $mode === 'login' ? 'Κωδικός πρόσβασης' : 'Νέος κωδικός πρόσβασης' ?></label>
-        <input type="password" name="password" required autofocus autocomplete="<?= $mode === 'login' ? 'current-password' : 'new-password' ?>">
+        <label for="password"><?= $mode === 'login' ? 'Κωδικός πρόσβασης' : 'Νέος κωδικός πρόσβασης' ?></label>
+        <input id="password" type="password" name="password" required autofocus autocomplete="<?= $mode === 'login' ? 'current-password' : 'new-password' ?>">
       </div>
 
       <?php if ($mode === 'setup'): ?>
         <div class="field">
-          <label>Επιβεβαίωση κωδικού</label>
-          <input type="password" name="password2" required autocomplete="new-password">
+          <label for="password2">Επιβεβαίωση κωδικού</label>
+          <input id="password2" type="password" name="password2" required autocomplete="new-password">
         </div>
       <?php endif; ?>
 

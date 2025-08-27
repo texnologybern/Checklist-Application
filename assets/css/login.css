@@ -16,6 +16,14 @@ body.login header {
   text-align: center;
 }
 
+body.login header .title {
+  font-size: clamp(24px, 5vw, 28px);
+}
+
+body.login header .subtitle {
+  font-size: clamp(13px, 2.5vw, 14px);
+}
+
 body.login .card {
   width: 100%;
   max-width: 560px;
@@ -40,6 +48,7 @@ body.login .field input {
   border-radius: 12px;
   padding: 12px;
   width: 100%;
+  min-height: 48px;
 }
 
 body.login .error {
@@ -57,17 +66,13 @@ body.login .toolbar {
 
 body.login .toolbar button {
   width: 100%;
+  font-size: clamp(16px, 4vw, 18px);
+  min-height: 48px;
 }
 
 @media (max-width: 768px) {
   body.login {
     padding: 20px;
-  }
-  body.login header .title {
-    font-size: 24px;
-  }
-  body.login header .subtitle {
-    font-size: 13px;
   }
   body.login .error {
     margin: 0 20px 14px;

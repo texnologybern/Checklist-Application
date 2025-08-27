@@ -64,16 +64,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="login">
   <div class="card">
-    <header>
-      <div>
+      <header>
         <div class="title"><?= htmlspecialchars($list_name, ENT_QUOTES) ?></div>
         <div class="subtitle">
           <?= $mode === 'login'
             ? 'Πληκτρολογήστε τον κωδικό πρόσβασης για να δείτε τη λίστα.'
             : 'Ορίστε έναν αρχικό κωδικό πρόσβασης για τη λίστα.' ?>
         </div>
-      </div>
-    </header>
+      </header>
 
     <?php if ($error): ?>
       <div class="error"><?= htmlspecialchars($error, ENT_QUOTES) ?></div>

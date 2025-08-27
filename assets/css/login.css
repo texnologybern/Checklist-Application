@@ -10,6 +10,12 @@ body.login {
   width: 100%;
 }
 
+body.login header {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
 body.login .card {
   width: 100%;
   max-width: 560px;

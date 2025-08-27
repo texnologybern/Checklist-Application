@@ -27,7 +27,7 @@ body.login header .subtitle {
 body.login .card {
   width: 100%;
   max-width: 560px;
-  margin: 0;
+  margin: 0 auto;
 }
 
 body.login .login-form {

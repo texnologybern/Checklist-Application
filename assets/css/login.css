@@ -52,7 +52,11 @@ body.login .error {
 }
 
 body.login .toolbar {
-  justify-content: flex-end;
+  padding: 0;
+}
+
+body.login .toolbar button {
+  width: 100%;
 }
 
 @media (max-width: 768px) {

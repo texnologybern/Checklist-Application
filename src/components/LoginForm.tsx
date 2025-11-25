@@ -83,15 +83,15 @@ export const LoginForm = ({ loading, error, onSubmit, onClearError }: LoginFormP
   return (
     <motion.form
       onSubmit={handleSubmit}
-      className="flex w-full max-w-md flex-col gap-6 rounded-3xl bg-slate-900/80 p-8 text-left shadow-2xl shadow-slate-950/40 backdrop-blur"
+        className="flex w-full max-w-md flex-col gap-6 rounded-3xl bg-slate-900/80 p-6 text-left shadow-2xl shadow-slate-950/40 backdrop-blur sm:p-8"
       initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: prefersReducedMotion ? 0 : 0.6, ease: 'easeOut' }}
       noValidate
     >
-      <header className="space-y-2">
+      <header className="space-y-2 text-center sm:text-left">
         <p className="text-sm uppercase tracking-[0.2em] text-primary/70">Checklist</p>
-        <h1 className="text-3xl font-semibold text-slate-50">Sign in to continue</h1>
+        <h1 className="text-2xl font-semibold text-slate-50 sm:text-3xl">Sign in to continue</h1>
         <p className="text-sm text-slate-400">
           Use the demo password <span className="font-medium text-slate-200">demo-pass1</span>. Replace the auth service to wire
           real credentials when ready.
@@ -161,7 +161,7 @@ export const LoginForm = ({ loading, error, onSubmit, onClearError }: LoginFormP
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-4 text-sm text-slate-300">
+      <div className="flex flex-col items-start justify-between gap-4 text-sm text-slate-300 sm:flex-row sm:items-center">
         <label className="inline-flex items-center gap-2">
           <input
             id="remember"
@@ -180,7 +180,7 @@ export const LoginForm = ({ loading, error, onSubmit, onClearError }: LoginFormP
 
       <button
         type="submit"
-        className="mt-2 flex items-center justify-center rounded-2xl bg-primary px-4 py-3 text-base font-semibold text-primary-foreground transition-transform duration-200 will-change-transform focus-visible:scale-100 disabled:cursor-not-allowed disabled:opacity-70"
+        className="mt-2 flex w-full items-center justify-center rounded-2xl bg-primary px-4 py-3 text-base font-semibold text-primary-foreground transition-transform duration-200 will-change-transform focus-visible:scale-100 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
         style={{ transform: 'translate3d(0,0,0)' }}
         disabled={loading}
       >

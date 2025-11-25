@@ -10,6 +10,7 @@ interface SortableCardProps {
   onDragStart: () => void;
   onDragEnd: () => void;
   isActive: boolean;
+  key?: string;
 }
 
 const toneStyles: Record<BoardCard['tone'], string> = {
@@ -69,13 +70,13 @@ export const SortableCard = ({
         animate={{ scale: isActive ? 1.02 : 1, opacity: isActive ? 0.96 : 1 }}
         transition={{ duration: reducedMotion ? 0 : 0.18, ease: 'easeOut' }}
       >
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <h3 className="text-lg font-semibold leading-tight text-white drop-shadow">{card.title}</h3>
-          <span className="rounded-full bg-white/10 px-3 py-1 text-xs uppercase tracking-wide text-white/80">
+          <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] uppercase tracking-wide text-white/80 sm:text-xs">
             Drag or use arrows
           </span>
         </div>
-        <p className="text-sm text-white/80">{card.body}</p>
+        <p className="text-sm text-white/80 leading-relaxed">{card.body}</p>
       </motion.div>
     </Reorder.Item>
   );

@@ -157,13 +157,29 @@ button.fab{display:none;width:56px;height:56px;border-radius:50%;background:var(
   .editForm .dateInputs{grid-template-columns:1fr}
   .addForm .dateInputs{grid-template-columns:1fr}
 
-  .task{grid-template-columns:26px 28px minmax(0,1fr) auto;gap:8px;padding:clamp(14px,5vw,22px)}
+  .task{
+    grid-template-columns:26px minmax(0,1fr);
+    grid-template-areas:
+      "handle actions"
+      "checkbox content";
+    gap:8px;
+    padding:clamp(14px,5vw,22px);
+  }
+  .task .handle{grid-area:handle;}
+  .task>input[type="checkbox"]{grid-area:checkbox;margin-top:2px;}
+  .task .content{grid-area:content;}
+  .task .actions{grid-area:actions;justify-content:flex-end;gap:6px;}
+  .task .actions button{width:36px;height:36px;}
   .task label{font-size:clamp(1rem,4.5vw,1.25rem)}
   .task .desc,.task .note{font-size:clamp(.875rem,3.8vw,1rem)}
 
   /* στο mobile οι ημερομηνίες στοιχίζονται κάθετα */
   .task .dates{flex-direction:column;align-items:flex-start}
   .task .dates .sep{display:none}
+
+  /* Better touch targets for note input on very small screens */
+  .addNote{flex-direction:column;align-items:stretch;}
+  .addNote button{width:100%;padding:10px;}
 
   /* Full-screen editor on mobile */
   .task.editing{

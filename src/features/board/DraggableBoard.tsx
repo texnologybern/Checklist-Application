@@ -55,19 +55,21 @@ export const DraggableBoard = ({
 
   return (
     <section
-      className="flex w-full flex-col gap-6 rounded-3xl bg-slate-900/70 p-8 shadow-2xl shadow-slate-950/40 backdrop-blur"
+      className="flex w-full flex-col gap-6 rounded-3xl bg-slate-900/70 p-6 shadow-2xl shadow-slate-950/40 backdrop-blur sm:p-8"
       aria-label="Layout editor"
     >
-      <header className="flex flex-wrap items-center justify-between gap-4 text-sm text-slate-300">
-        <div className="space-y-1">
-          <h2 className="text-xl font-semibold text-white">Arrange your workspace</h2>
-          <p>Drag the cards or use the arrow keys while focused on a card. Press Escape to cancel a drag.</p>
+      <header className="flex flex-col gap-4 text-sm text-slate-300 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="space-y-1 text-center sm:text-left">
+          <h2 className="text-xl font-semibold text-white sm:text-2xl">Arrange your workspace</h2>
+          <p className="leading-relaxed text-slate-300/90">
+            Drag the cards or use the arrow keys while focused on a card. Press Escape to cancel a drag.
+          </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <button
             type="button"
             onClick={onResetLayout}
-            className="rounded-2xl border border-slate-700/60 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500"
+            className="w-full rounded-2xl border border-slate-700/60 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 sm:w-auto"
           >
             Reset layout
           </button>
@@ -75,7 +77,7 @@ export const DraggableBoard = ({
             type="button"
             onClick={onPersistLayout}
             disabled={isPersisting}
-            className="rounded-2xl bg-primary/80 px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary disabled:cursor-not-allowed disabled:opacity-70"
+            className="w-full rounded-2xl bg-primary/80 px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
             style={{ transform: 'translate3d(0,0,0)' }}
           >
             {isPersisting ? 'Saving…' : 'Save layout'}
@@ -87,7 +89,8 @@ export const DraggableBoard = ({
         axis="y"
         values={cards}
         onReorder={onOrderChange}
-        className="grid gap-4 md:grid-cols-2"
+        // @ts-expect-error Type shims keep framer-motion markup permissive in this environment
+        className="grid gap-4 sm:grid-cols-2"
         as="div"
       >
         {cards.map((card) => (

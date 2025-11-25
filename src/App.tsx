@@ -95,17 +95,17 @@ const App = () => {
 
   return (
     <div className="flex min-h-full flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <div className="mx-auto flex w-full max-w-5xl grow flex-col items-center justify-center px-6 py-16">
-        <main className="flex w-full flex-col items-center gap-10 lg:flex-row lg:items-start lg:justify-between">
+      <div className="mx-auto flex w-full max-w-5xl grow flex-col items-center justify-center px-4 py-12 sm:px-6 sm:py-16">
+        <main className="flex w-full flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
           <div className="flex w-full max-w-xl justify-center">
             <LoginForm loading={status === 'loading'} error={error} onSubmit={login} onClearError={clearError} />
           </div>
 
           <div className="flex w-full max-w-xl flex-col gap-6">
-            <section className="rounded-3xl bg-slate-900/70 p-6 shadow-2xl shadow-slate-950/40 backdrop-blur">
-              <header className="mb-4 space-y-2 text-left">
+            <section className="rounded-3xl bg-slate-900/70 p-5 shadow-2xl shadow-slate-950/40 backdrop-blur sm:p-6">
+              <header className="mb-4 space-y-2 text-center sm:text-left">
                 <p className="text-sm uppercase tracking-[0.3em] text-primary/70">Live preview</p>
-                <h2 className="text-2xl font-semibold text-white">Workspace layout</h2>
+                <h2 className="text-2xl font-semibold text-white sm:text-3xl">Workspace layout</h2>
                 <p className="text-sm text-slate-400">
                   {status === 'authenticated'
                     ? `Signed in as ${session?.displayName}. Drag cards to personalise your dashboard.`
@@ -114,7 +114,7 @@ const App = () => {
               </header>
 
               {status !== 'authenticated' ? (
-                <p className="rounded-2xl border border-slate-700/60 bg-slate-900/60 p-6 text-sm text-slate-400">
+                <p className="rounded-2xl border border-slate-700/60 bg-slate-900/60 p-4 text-sm text-slate-400 sm:p-6">
                   Arrange the demo cards even before signing in. We keep mutations local until you authenticate.
                 </p>
               ) : null}
@@ -131,9 +131,9 @@ const App = () => {
 
             <section
               aria-labelledby="how-to-extend"
-              className="rounded-3xl bg-slate-900/60 p-6 text-sm text-slate-300 shadow-xl shadow-slate-950/30 backdrop-blur"
+              className="rounded-3xl bg-slate-900/60 p-5 text-sm text-slate-300 shadow-xl shadow-slate-950/30 backdrop-blur sm:p-6"
             >
-              <h2 id="how-to-extend" className="text-lg font-semibold text-white">
+              <h2 id="how-to-extend" className="text-lg font-semibold text-white sm:text-xl">
                 How to extend
               </h2>
               <ul className="mt-3 list-disc space-y-2 pl-5">

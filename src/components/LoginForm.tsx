@@ -7,20 +7,30 @@ interface LoginFormProps {
   error: string | null;
   onSubmit: (credentials: AuthCredentials) => Promise<void>;
   onClearError: () => void;
+  showTenant?: boolean;
+  defaultTenant?: string;
+  backendMode?: 'local' | 'api';
 }
 
 type FieldErrors = Partial<Record<'email' | 'password', string>>;
 
-const initialForm: AuthCredentials = {
-  email: '',
-  password: '',
-  remember: true
-};
-
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export const LoginForm = ({ loading, error, onSubmit, onClearError }: LoginFormProps) => {
-  const [form, setForm] = useState<AuthCredentials>(initialForm);
+export const LoginForm = ({
+  loading,
+  error,
+  onSubmit,
+  onClearError,
+  showTenant = false,
+  defaultTenant = 'default',
+  backendMode = 'local'
+}: LoginFormProps) => {
+  const [form, setForm] = useState<AuthCredentials>({
+    email: '',
+    password: '',
+    remember: true,
+    tenant: defaultTenant
+  });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [submitted, setSubmitted] = useState(false);
   const errorRef = useRef<HTMLParagraphElement>(null);
@@ -59,6 +69,13 @@ export const LoginForm = ({ loading, error, onSubmit, onClearError }: LoginFormP
     }
   };
 
+  const handlePrefillDemo = () => {
+    setForm({ email: 'admin@demo.test', password: 'demo-pass1', remember: true, tenant: defaultTenant });
+    setFieldErrors({});
+    setSubmitted(false);
+    onClearError();
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitted(true);
@@ -83,7 +100,7 @@ export const LoginForm = ({ loading, error, onSubmit, onClearError }: LoginFormP
   return (
     <motion.form
       onSubmit={handleSubmit}
-        className="flex w-full max-w-md flex-col gap-6 rounded-3xl bg-slate-900/80 p-6 text-left shadow-2xl shadow-slate-950/40 backdrop-blur sm:p-8"
+      className="flex w-full max-w-md flex-col gap-6 rounded-3xl bg-slate-900/80 p-6 text-left shadow-2xl shadow-slate-950/40 backdrop-blur sm:p-8"
       initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: prefersReducedMotion ? 0 : 0.6, ease: 'easeOut' }}
@@ -159,6 +176,26 @@ export const LoginForm = ({ loading, error, onSubmit, onClearError }: LoginFormP
             </p>
           )}
         </div>
+
+        {showTenant ? (
+          <div className="flex flex-col gap-2">
+            <label htmlFor="tenant" className="text-sm font-medium text-slate-200">
+              Workspace (tenant) slug
+            </label>
+            <input
+              id="tenant"
+              type="text"
+              autoComplete="organization"
+              value={form.tenant ?? ''}
+              onChange={handleChange('tenant')}
+              className="w-full rounded-2xl border border-slate-700/60 bg-slate-900/70 px-4 py-3 text-base text-slate-100 shadow-inner shadow-slate-950/40 transition focus:border-primary/60 focus:bg-slate-900"
+            />
+            <p className="text-sm text-slate-400">
+              Use <code className="font-mono text-slate-200">{defaultTenant}</code> unless you created a different workspace with
+              the CLI.
+            </p>
+          </div>
+        ) : null}
       </div>
 
       <div className="flex flex-col items-start justify-between gap-4 text-sm text-slate-300 sm:flex-row sm:items-center">
@@ -173,9 +210,46 @@ export const LoginForm = ({ loading, error, onSubmit, onClearError }: LoginFormP
           />
           <span>Remember this device</span>
         </label>
-        <button type="button" className="text-primary/80 hover:text-primary" onClick={() => setForm(initialForm)}>
+        <button
+          type="button"
+          className="text-primary/80 hover:text-primary"
+          onClick={() => setForm({ email: '', password: '', remember: true, tenant: defaultTenant })}
+        >
           Clear form
         </button>
+      </div>
+
+      <div className="rounded-2xl border border-slate-700/60 bg-slate-900/60 p-4 text-sm text-slate-300">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-[0.18em] text-primary/70">Need a quick login?</p>
+            <p className="text-sm text-slate-200">
+              Use <span className="font-semibold text-white">admin@demo.test</span> and <span className="font-semibold text-white">demo-pass1</span>
+              {showTenant ? (
+                <>
+                  {' '}for workspace <span className="font-mono text-white">{defaultTenant}</span>.
+                </>
+              ) : (
+                '.'
+              )}
+            </p>
+            {backendMode === 'api' ? (
+              <p className="text-xs text-slate-400">
+                If login fails, ensure the PHP server is running (e.g. <code className="font-mono text-slate-200">php -S 0.0.0.0:8000</code>) and that
+                <code className="font-mono text-slate-200">VITE_USE_API_AUTH=true</code> points to the correct URL.
+              </p>
+            ) : (
+              <p className="text-xs text-slate-400">Local demo mode stores the session in your browser only.</p>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={handlePrefillDemo}
+            className="rounded-xl border border-primary/50 px-3 py-2 text-sm font-semibold text-primary transition hover:bg-primary/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+          >
+            Fill demo details
+          </button>
+        </div>
       </div>
 
       <button

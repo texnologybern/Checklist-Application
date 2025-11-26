@@ -44,6 +44,7 @@ const App = () => {
   const reducedMotion = useReducedMotionPref();
   const useApiBackend = (import.meta.env.VITE_USE_API_AUTH ?? 'false') === 'true';
   const apiBase = import.meta.env.VITE_API_BASE ?? '/saas_api.php';
+  const defaultTenant = import.meta.env.VITE_TENANT_SLUG ?? 'default';
   const authService = useMemo(
     () => (useApiBackend ? new ApiAuthService(apiBase) : new LocalAuthService()),
     [apiBase, useApiBackend]
@@ -106,7 +107,15 @@ const App = () => {
       <div className="mx-auto flex w-full max-w-5xl grow flex-col items-center justify-center px-4 py-12 sm:px-6 sm:py-16">
         <main className="flex w-full flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
           <div className="flex w-full max-w-xl justify-center">
-            <LoginForm loading={status === 'loading'} error={error} onSubmit={login} onClearError={clearError} />
+            <LoginForm
+              loading={status === 'loading'}
+              error={error}
+              onSubmit={login}
+              onClearError={clearError}
+              showTenant={useApiBackend}
+              defaultTenant={defaultTenant}
+              backendMode={useApiBackend ? 'api' : 'local'}
+            />
           </div>
 
           <div className="flex w-full max-w-xl flex-col gap-6">

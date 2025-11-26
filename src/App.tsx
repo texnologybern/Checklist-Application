@@ -1,192 +1,209 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { LoginForm } from './components/LoginForm';
-import { DraggableBoard } from './features/board/DraggableBoard';
-import type { BoardCard } from './features/board/types';
-import { useAuth } from './hooks/useAuth';
-import { useReducedMotionPref } from './hooks/useReducedMotionPref';
-import { ApiAuthService, LocalAuthService } from './services/auth';
-import { ApiLayoutService, LocalLayoutService } from './services/layoutService';
+export interface AuthCredentials {
+  email: string;
+  password: string;
+  remember?: boolean;
+  tenant?: string;
+}
 
-const defaultCards: BoardCard[] = [
-  {
-    id: 'prep',
-    title: 'Pre-arrival checklist',
-    body: 'Review bookings, sync stakeholders, and share arrival instructions with guests or teammates.',
-    tone: 'info'
-  },
-  {
-    id: 'maintenance',
-    title: 'Maintenance queue',
-    body: 'Track outstanding repairs, assign the next task, and log ETA updates for service providers.',
-    tone: 'warning'
-  },
-  {
-    id: 'inventory',
-    title: 'Inventory snapshot',
-    body: 'Audit supplies, flag restock priorities, and record vendor orders for transparency.',
-    tone: 'success'
-  },
-  {
-    id: 'handover',
-    title: 'Handover notes',
-    body: 'Capture shift summaries, escalations, and context for whoever signs in next.',
-    tone: 'danger'
-  }
-];
+export interface AuthSession {
+  id: string;
+  email: string;
+  displayName: string;
+  token: string;
+  lastAuthenticatedAt: number;
+  tenantId?: number;
+  tenantSlug?: string;
+  roles?: string[];
+  subscription?: { plan: string; status: string; seats?: number; endsAt?: string | null } | null;
+}
+
+export interface AuthService {
+  login(credentials: AuthCredentials): Promise<AuthSession>;
+  getSession(): Promise<AuthSession | null>;
+  logout(): Promise<void>;
+}
+
+const SESSION_KEY = 'checklist-app:session';
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * The top-level app wires together the domain services and the UI primitives. To
- * hook this up to real infrastructure replace LocalAuthService and
- * LocalLayoutService with adapters that satisfy the same interfaces. No UI
- * changes are required thanks to those abstractions.
+ * LocalAuthService simulates an authentication provider. The async boundaries and
+ * token handling mirror what a real HTTP API would do so we can swap the
+ * implementation without touching the UI. Swap the internals with a fetch call
+ * (or SDK) and keep the interface intact.
  */
-const App = () => {
-  const reducedMotion = useReducedMotionPref();
-  const useApiBackend = (import.meta.env.VITE_USE_API_AUTH ?? 'false') === 'true';
-  const apiBase = import.meta.env.VITE_API_BASE ?? '/saas_api.php';
-  const defaultTenant = import.meta.env.VITE_TENANT_SLUG ?? 'default';
-  const authService = useMemo(
-    () => (useApiBackend ? new ApiAuthService(apiBase) : new LocalAuthService()),
-    [apiBase, useApiBackend]
-  );
-  const layoutService = useMemo(
-    () => (useApiBackend ? new ApiLayoutService(apiBase) : new LocalLayoutService()),
-    [apiBase, useApiBackend]
-  );
-  const { status, session, login, logout, error, clearError } = useAuth(authService);
-  const [cards, setCards] = useState<BoardCard[]>(defaultCards);
-  const [isPersisting, setIsPersisting] = useState(false);
+export class LocalAuthService implements AuthService {
+  private readonly storage: Storage | null;
 
-  useEffect(() => {
-    if (status !== 'authenticated') {
-      setCards(defaultCards);
-      return;
+  constructor(storage: Storage | null = typeof window !== 'undefined' ? window.localStorage : null) {
+    this.storage = storage;
+  }
+
+  async login(credentials: AuthCredentials): Promise<AuthSession> {
+    await delay(320); // simulate the network boundary for skeleton/loading states
+
+    const trimmedEmail = credentials.email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      throw new Error('Please provide a valid email address.');
     }
 
-    let cancelled = false;
-    layoutService
-      .load()
-      .then((stored) => {
-        if (cancelled || !stored) {
-          return;
-        }
+    if (credentials.password.length < 8) {
+      throw new Error('Passwords must be at least 8 characters long.');
+    }
 
-        setCards(stored);
-      })
-      .catch(() => {
-        /* Swallow errors so the UI remains interactive */
-      });
+    if (!/\d/.test(credentials.password)) {
+      throw new Error('The password must include at least one number.');
+    }
 
-    return () => {
-      cancelled = true;
+    if (credentials.password !== 'demo-pass1') {
+      throw new Error('Invalid email or password.');
+    }
+
+    const session: AuthSession = {
+      id: crypto.randomUUID(),
+      email: trimmedEmail,
+      displayName: trimmedEmail.split('@')[0],
+      token: crypto.randomUUID(),
+      lastAuthenticatedAt: Date.now()
     };
-  }, [layoutService, status]);
 
-  const handleOrderChange = useCallback((next: BoardCard[]) => {
-    setCards(next);
-  }, []);
-
-  const handleResetLayout = useCallback(() => {
-    setCards(defaultCards);
-    layoutService.clear().catch(() => {
-      /* no-op: keep UI responsive */
-    });
-  }, [layoutService]);
-
-  const handlePersistLayout = useCallback(async () => {
-    setIsPersisting(true);
-    try {
-      await layoutService.save(cards);
-    } finally {
-      setIsPersisting(false);
+    if (credentials.remember && this.storage) {
+      this.storage.setItem(SESSION_KEY, JSON.stringify(session));
     }
-  }, [cards, layoutService]);
 
-  return (
-    <div className="flex min-h-full flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <div className="mx-auto flex w-full max-w-5xl grow flex-col items-center justify-center px-4 py-12 sm:px-6 sm:py-16">
-        <main className="flex w-full flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
-          <div className="flex w-full max-w-xl justify-center">
-            <LoginForm
-              loading={status === 'loading'}
-              error={error}
-              onSubmit={login}
-              onClearError={clearError}
-              showTenant={useApiBackend}
-              defaultTenant={defaultTenant}
-              backendMode={useApiBackend ? 'api' : 'local'}
-            />
-          </div>
+    return session;
+  }
 
-          <div className="flex w-full max-w-xl flex-col gap-6">
-            <section className="rounded-3xl bg-slate-900/70 p-5 shadow-2xl shadow-slate-950/40 backdrop-blur sm:p-6">
-              <header className="mb-4 space-y-2 text-center sm:text-left">
-                <p className="text-sm uppercase tracking-[0.3em] text-primary/70">Live preview</p>
-                <h2 className="text-2xl font-semibold text-white sm:text-3xl">Workspace layout</h2>
-                <p className="text-sm text-slate-400">
-                  {status === 'authenticated'
-                    ? `Signed in as ${session?.displayName}. Drag cards to personalise your dashboard.`
-                    : 'Sign in to unlock layout persistence and collaborative features.'}
-                </p>
-              </header>
+  async getSession(): Promise<AuthSession | null> {
+    if (!this.storage) {
+      return null;
+    }
 
-              {status !== 'authenticated' ? (
-                <p className="rounded-2xl border border-slate-700/60 bg-slate-900/60 p-4 text-sm text-slate-400 sm:p-6">
-                  Arrange the demo cards even before signing in. We keep mutations local until you authenticate.
-                </p>
-              ) : null}
-            </section>
+    const raw = this.storage.getItem(SESSION_KEY);
+    if (!raw) {
+      return null;
+    }
 
-            <DraggableBoard
-              cards={cards}
-              reducedMotion={reducedMotion}
-              onOrderChange={handleOrderChange}
-              onResetLayout={handleResetLayout}
-              onPersistLayout={handlePersistLayout}
-              isPersisting={isPersisting}
-            />
+    try {
+      const session = JSON.parse(raw) as AuthSession;
+      return session;
+    } catch (error) {
+      this.storage.removeItem(SESSION_KEY);
+      return null;
+    }
+  }
 
-            <section
-              aria-labelledby="how-to-extend"
-              className="rounded-3xl bg-slate-900/60 p-5 text-sm text-slate-300 shadow-xl shadow-slate-950/30 backdrop-blur sm:p-6"
-            >
-              <h2 id="how-to-extend" className="text-lg font-semibold text-white sm:text-xl">
-                How to extend
-              </h2>
-              <ul className="mt-3 list-disc space-y-2 pl-5">
-                <li>
-                  <span className="font-medium text-slate-100">Authentication:</span> replace <code>LocalAuthService</code> with an
-                  adapter that calls your API. Keep the <code>AuthService</code> contract intact and the UI stays unchanged.
-                </li>
-                <li>
-                  <span className="font-medium text-slate-100">Persistence:</span> implement <code>LayoutService</code> against REST,
-                  GraphQL, or IndexedDB. Save and load methods are already awaited.
-                </li>
-                <li>
-                  <span className="font-medium text-slate-100">Card types:</span> extend <code>BoardCard</code> with new attributes and
-                  branch inside <code>SortableCard</code> to render specialised layouts.
-                </li>
-              </ul>
-            </section>
-          </div>
-        </main>
+  async logout(): Promise<void> {
+    if (this.storage) {
+      this.storage.removeItem(SESSION_KEY);
+    }
+  }
+}
 
-        {status === 'authenticated' ? (
-          <button
-            type="button"
-            onClick={logout}
-            className="mt-10 rounded-2xl border border-slate-700/60 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500"
-          >
-            Sign out
-          </button>
-        ) : null}
-      </div>
+export class ApiAuthService implements AuthService {
+  private readonly baseUrl: string;
+  private csrf: string | null = null;
 
-      <footer className="px-6 pb-8 text-center text-xs text-slate-500">
-        Crafted with accessibility-first patterns. Animations respect reduced-motion preferences.
-      </footer>
-    </div>
-  );
-};
+  constructor(baseUrl = '/saas_api.php') {
+    this.baseUrl = baseUrl;
+  }
 
-export default App;
+  private async request<T>(path: string, init?: RequestInit): Promise<T> {
+    let res: Response;
+
+    try {
+      res = await fetch(`${this.baseUrl}${path}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(this.csrf ? { 'X-CSRF-Token': this.csrf } : {})
+        },
+        ...init
+      });
+    } catch (error) {
+      const message = `Cannot reach the API at ${this.baseUrl}. Start the PHP server (e.g. php -S 0.0.0.0:8000) or set VITE_USE_API_AUTH=false to use local demo mode.`;
+      throw new Error(message);
+    }
+
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      throw new Error(data?.error || 'Request failed');
+    }
+
+    if (data.csrf) {
+      this.csrf = data.csrf;
+    }
+
+    return data as T;
+  }
+
+  async login(credentials: AuthCredentials): Promise<AuthSession> {
+    // Χρησιμοποιούμε import.meta.env αντί για process.env στο Vite
+    const tenant = credentials.tenant || import.meta.env.VITE_TENANT_SLUG || 'default';
+    const payload = { ...credentials, tenant };
+
+    const data = await this.request<any>(`?action=login`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    const subscription = data.subscription
+      ? {
+          plan: data.subscription.plan ?? 'free',
+          status: data.subscription.status ?? 'active',
+          seats: data.subscription.seats ?? undefined,
+          endsAt: data.subscription.ends_at ?? null
+        }
+      : null;
+
+    return {
+      id: String(data.user.id),
+      email: data.user.email,
+      displayName: data.user.displayName ?? data.user.email,
+      token: data.csrf || crypto.randomUUID(),
+      lastAuthenticatedAt: Date.now(),
+      tenantId: data.tenant?.id,
+      tenantSlug: data.tenant?.slug,
+      roles: data.user.roles ?? [],
+      subscription
+    };
+  }
+
+  async getSession(): Promise<AuthSession | null> {
+    try {
+      const data = await this.request<any>(`?action=me`, { method: 'GET' });
+
+      const subscription = data.subscription
+        ? {
+            plan: data.subscription.plan ?? 'free',
+            status: data.subscription.status ?? 'active',
+            seats: data.subscription.seats ?? undefined,
+            endsAt: data.subscription.ends_at ?? null
+          }
+        : null;
+
+      return {
+        id: String(data.user.id),
+        email: data.user.email,
+        displayName: data.user.displayName ?? data.user.email,
+        token: data.csrf || crypto.randomUUID(),
+        lastAuthenticatedAt: Date.now(),
+        tenantId: data.tenant?.id,
+        tenantSlug: data.tenant?.slug,
+        roles: data.user.roles ?? [],
+        subscription
+      };
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await this.request(`?action=logout`, { method: 'POST' });
+    } finally {
+      this.csrf = null;
+    }
+  }
+}

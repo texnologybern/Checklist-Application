@@ -1,158 +1,209 @@
-<?php
-require_once __DIR__ . '/app/bootstrap.php';
-ensure_migrated();
-header('Content-Type: application/json; charset=UTF-8');
-
-$action = $_GET['action'] ?? '';
-
-function j($data, int $code = 200): void {
-  http_response_code($code);
-  echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-  exit;
+export interface AuthCredentials {
+  email: string;
+  password: string;
+  remember?: boolean;
+  tenant?: string;
 }
 
-function require_method(string $method): void {
-  if (strtoupper($_SERVER['REQUEST_METHOD'] ?? '') !== strtoupper($method)) {
-    j(['ok' => false, 'error' => 'Method Not Allowed'], 405);
+export interface AuthSession {
+  id: string;
+  email: string;
+  displayName: string;
+  token: string;
+  lastAuthenticatedAt: number;
+  tenantId?: number;
+  tenantSlug?: string;
+  roles?: string[];
+  subscription?: { plan: string; status: string; seats?: number; endsAt?: string | null } | null;
+}
+
+export interface AuthService {
+  login(credentials: AuthCredentials): Promise<AuthSession>;
+  getSession(): Promise<AuthSession | null>;
+  logout(): Promise<void>;
+}
+
+const SESSION_KEY = 'checklist-app:session';
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * LocalAuthService simulates an authentication provider. The async boundaries and
+ * token handling mirror what a real HTTP API would do so we can swap the
+ * implementation without touching the UI. Swap the internals with a fetch call
+ * (or SDK) and keep the interface intact.
+ */
+export class LocalAuthService implements AuthService {
+  private readonly storage: Storage | null;
+
+  constructor(storage: Storage | null = typeof window !== 'undefined' ? window.localStorage : null) {
+    this.storage = storage;
+  }
+
+  async login(credentials: AuthCredentials): Promise<AuthSession> {
+    await delay(320); // simulate the network boundary for skeleton/loading states
+
+    const trimmedEmail = credentials.email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      throw new Error('Please provide a valid email address.');
+    }
+
+    if (credentials.password.length < 8) {
+      throw new Error('Passwords must be at least 8 characters long.');
+    }
+
+    if (!/\d/.test(credentials.password)) {
+      throw new Error('The password must include at least one number.');
+    }
+
+    if (credentials.password !== 'demo-pass1') {
+      throw new Error('Invalid email or password.');
+    }
+
+    const session: AuthSession = {
+      id: crypto.randomUUID(),
+      email: trimmedEmail,
+      displayName: trimmedEmail.split('@')[0],
+      token: crypto.randomUUID(),
+      lastAuthenticatedAt: Date.now()
+    };
+
+    if (credentials.remember && this.storage) {
+      this.storage.setItem(SESSION_KEY, JSON.stringify(session));
+    }
+
+    return session;
+  }
+
+  async getSession(): Promise<AuthSession | null> {
+    if (!this.storage) {
+      return null;
+    }
+
+    const raw = this.storage.getItem(SESSION_KEY);
+    if (!raw) {
+      return null;
+    }
+
+    try {
+      const session = JSON.parse(raw) as AuthSession;
+      return session;
+    } catch (error) {
+      this.storage.removeItem(SESSION_KEY);
+      return null;
+    }
+  }
+
+  async logout(): Promise<void> {
+    if (this.storage) {
+      this.storage.removeItem(SESSION_KEY);
+    }
   }
 }
 
-try {
-  $pdo = DB::conn();
+export class ApiAuthService implements AuthService {
+  private readonly baseUrl: string;
+  private csrf: string | null = null;
 
-  switch ($action) {
-    case 'login': {
-      if (strtoupper($_SERVER['REQUEST_METHOD'] ?? '') === 'GET') {
-        j([
-          'ok' => true,
-          'info' => 'Use POST with JSON to log in.',
-          'example' => [
-            'url' => 'saas_api.php?action=login',
-            'method' => 'POST',
-            'body' => [
-              'email' => 'admin@demo.test',
-              'password' => 'demo-pass1',
-              'tenant' => 'default'
-            ],
-          ],
-        ]);
-      }
-
-      require_method('POST');
-      $body = json_decode(file_get_contents('php://input'), true) ?: [];
-      $email = strtolower(trim((string)($body['email'] ?? '')));
-      $password = (string)($body['password'] ?? '');
-      $tenantSlug = trim((string)($body['tenant'] ?? 'default'));
-
-      if ($email === '' || $password === '') {
-        j(['ok' => false, 'error' => 'Email and password are required.'], 400);
-      }
-
-      $tenantStmt = $pdo->prepare('SELECT id,name,slug,plan,status FROM tenants WHERE slug=?');
-      $tenantStmt->execute([$tenantSlug]);
-      $tenant = $tenantStmt->fetch();
-      if (!$tenant) j(['ok' => false, 'error' => 'Tenant not found.'], 404);
-
-      $userStmt = $pdo->prepare('SELECT id, tenant_id, email, display_name, password_hash, status FROM users WHERE tenant_id=? AND email=?');
-      $userStmt->execute([(int)$tenant['id'], $email]);
-      $user = $userStmt->fetch();
-
-      if (!$user || !password_verify($password, (string)$user['password_hash'])) {
-        j(['ok' => false, 'error' => 'Invalid email or password.'], 401);
-      }
-
-      if (($user['status'] ?? '') !== 'active') {
-        j(['ok' => false, 'error' => 'Account is disabled for this workspace.'], 403);
-      }
-
-      $rolesStmt = $pdo->prepare('SELECT r.slug FROM roles r JOIN user_roles ur ON ur.role_id=r.id WHERE ur.user_id=? ORDER BY r.slug');
-      $rolesStmt->execute([(int)$user['id']]);
-      $roles = array_map(fn($r) => $r['slug'], $rolesStmt->fetchAll());
-
-      set_user_session((int)$user['id'], (int)$tenant['id'], $roles);
-      $subscription = tenant_subscription($pdo, (int)$tenant['id']);
-
-      j([
-        'ok' => true,
-        'user' => [
-          'id' => (int)$user['id'],
-          'email' => $user['email'],
-          'displayName' => $user['display_name'],
-          'roles' => $roles,
-        ],
-        'tenant' => [
-          'id' => (int)$tenant['id'],
-          'name' => $tenant['name'],
-          'slug' => $tenant['slug'],
-          'plan' => $tenant['plan'],
-          'status' => $tenant['status'],
-        ],
-        'subscription' => $subscription,
-        'csrf' => csrf_token(),
-      ]);
-    }
-
-    case 'me': {
-      require_method('GET');
-      $user = require_user($pdo);
-      $tenantStmt = $pdo->prepare('SELECT id,name,slug,plan,status FROM tenants WHERE id=?');
-      $tenantStmt->execute([(int)$user['tenant_id']]);
-      $tenant = $tenantStmt->fetch();
-      $subscription = tenant_subscription($pdo, (int)$user['tenant_id']);
-
-      j([
-        'ok' => true,
-        'user' => [
-          'id' => (int)$user['id'],
-          'email' => $user['email'],
-          'displayName' => $user['display_name'],
-          'roles' => $user['roles'],
-        ],
-        'tenant' => $tenant,
-        'subscription' => $subscription,
-        'csrf' => csrf_token(),
-      ]);
-    }
-
-    case 'logout': {
-      require_method('POST');
-      clear_user_session();
-      j(['ok' => true]);
-    }
-
-    case 'layout_load': {
-      require_method('GET');
-      $user = require_user($pdo);
-      $st = $pdo->prepare('SELECT layout FROM user_layouts WHERE user_id=? AND tenant_id=?');
-      $st->execute([(int)$user['id'], (int)$user['tenant_id']]);
-      $layout = $st->fetchColumn();
-      j(['ok' => true, 'layout' => $layout ? json_decode((string)$layout, true) : null]);
-    }
-
-    case 'layout_save': {
-      require_method('POST');
-      $user = require_user($pdo);
-      $body = json_decode(file_get_contents('php://input'), true) ?: [];
-      $layout = $body['layout'] ?? [];
-      if (!is_array($layout)) j(['ok' => false, 'error' => 'Layout must be an array'], 400);
-
-      $payload = json_encode($layout, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-      $st = $pdo->prepare('INSERT INTO user_layouts(user_id, tenant_id, layout) VALUES(?,?,?) ON DUPLICATE KEY UPDATE layout=VALUES(layout)');
-      $st->execute([(int)$user['id'], (int)$user['tenant_id'], $payload]);
-      j(['ok' => true]);
-    }
-
-    case 'layout_clear': {
-      require_method('POST');
-      $user = require_user($pdo);
-      $st = $pdo->prepare('DELETE FROM user_layouts WHERE user_id=? AND tenant_id=?');
-      $st->execute([(int)$user['id'], (int)$user['tenant_id']]);
-      j(['ok' => true]);
-    }
-
-    default:
-      j(['ok' => false, 'error' => 'Unknown action'], 404);
+  constructor(baseUrl = '/saas_api.php') {
+    this.baseUrl = baseUrl;
   }
-} catch (Throwable $e) {
-  j(['ok' => false, 'error' => 'Server error', 'detail' => $e->getMessage()], 500);
+
+  private async request<T>(path: string, init?: RequestInit): Promise<T> {
+    let res: Response;
+
+    try {
+      res = await fetch(`${this.baseUrl}${path}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(this.csrf ? { 'X-CSRF-Token': this.csrf } : {})
+        },
+        ...init
+      });
+    } catch (error) {
+      const message = `Cannot reach the API at ${this.baseUrl}. Start the PHP server (e.g. php -S 0.0.0.0:8000) or set VITE_USE_API_AUTH=false to use local demo mode.`;
+      throw new Error(message);
+    }
+
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      throw new Error(data?.error || 'Request failed');
+    }
+
+    if (data.csrf) {
+      this.csrf = data.csrf;
+    }
+
+    return data as T;
+  }
+
+  async login(credentials: AuthCredentials): Promise<AuthSession> {
+    // Χρησιμοποιούμε import.meta.env αντί για process.env στο Vite
+    const tenant = credentials.tenant || import.meta.env.VITE_TENANT_SLUG || 'default';
+    const payload = { ...credentials, tenant };
+
+    const data = await this.request<any>(`?action=login`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    const subscription = data.subscription
+      ? {
+          plan: data.subscription.plan ?? 'free',
+          status: data.subscription.status ?? 'active',
+          seats: data.subscription.seats ?? undefined,
+          endsAt: data.subscription.ends_at ?? null
+        }
+      : null;
+
+    return {
+      id: String(data.user.id),
+      email: data.user.email,
+      displayName: data.user.displayName ?? data.user.email,
+      token: data.csrf || crypto.randomUUID(),
+      lastAuthenticatedAt: Date.now(),
+      tenantId: data.tenant?.id,
+      tenantSlug: data.tenant?.slug,
+      roles: data.user.roles ?? [],
+      subscription
+    };
+  }
+
+  async getSession(): Promise<AuthSession | null> {
+    try {
+      const data = await this.request<any>(`?action=me`, { method: 'GET' });
+
+      const subscription = data.subscription
+        ? {
+            plan: data.subscription.plan ?? 'free',
+            status: data.subscription.status ?? 'active',
+            seats: data.subscription.seats ?? undefined,
+            endsAt: data.subscription.ends_at ?? null
+          }
+        : null;
+
+      return {
+        id: String(data.user.id),
+        email: data.user.email,
+        displayName: data.user.displayName ?? data.user.email,
+        token: data.csrf || crypto.randomUUID(),
+        lastAuthenticatedAt: Date.now(),
+        tenantId: data.tenant?.id,
+        tenantSlug: data.tenant?.slug,
+        roles: data.user.roles ?? [],
+        subscription
+      };
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await this.request(`?action=logout`, { method: 'POST' });
+    } finally {
+      this.csrf = null;
+    }
+  }
 }

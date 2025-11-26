@@ -36,19 +36,6 @@
   - Τα roles πρέπει να αντιστοιχούν σε υπάρχοντα slugs (`admin`, `member`, `viewer`). Το script εξασφαλίζει ότι οι ρόλοι υπάρχουν πριν γίνει η αντιστοίχιση.
 - Οι χρήστες και τα layouts αποθηκεύονται ανά tenant, οπότε κάθε workspace έχει απομονωμένα δεδομένα και ρυθμίσεις διεπαφής.
 
-## Πώς κάνω login (σε απλά βήματα)
-1. **Άνοιξε το backend** σε PHP server (π.χ. `php -S 0.0.0.0:8000`).
-2. **Demo λογαριασμός**: email `admin@demo.test`, κωδικός `demo-pass1`, tenant `default`.
-3. **Web φόρμα**: επίσκεψη στο `http://localhost:8000/login.php?list_id=1`, βάλε email/κωδικό. Η συνεδρία κρατά tenant + CSRF και μετά μπορείς να ανοίξεις `index.php?list_id=1`.
-4. **JSON API (cURL)**: 
-   ```bash
-   curl -X POST "http://localhost:8000/saas_api.php?action=login" \
-     -H "Content-Type: application/json" \
-     -d '{"email":"admin@demo.test","password":"demo-pass1","tenant":"default"}'
-   ```
-   Η απάντηση περιέχει χρήστη, ρόλους, tenant, subscription και CSRF token· το cookie συνεδρίας απομονώνει τα δεδομένα στον δικό σου tenant.
-5. **Σενάρια παραγωγής**: δημιούργησε δικό σου tenant/χρήστη με `bin/create_user.php` και χρησιμοποίησε τα στοιχεία αυτά αντί για το demo.
-
 ## Περιβάλλον Παραγωγής
 - Εκτελέστε `npm run build` και σερβίρετε τα περιεχόμενα του `dist/` μαζί με τα PHP αρχεία.
 - Ρυθμίστε server με PHP 8 και ενεργό `mod_rewrite` (ή αντίστοιχη ρύθμιση σε Nginx).

@@ -21,7 +21,13 @@ try {
   $pdo = DB::conn();
 
   switch ($action) {
+
+    /* ============================================================
+       LOGIN
+    ============================================================ */
     case 'login': {
+
+      // GET → Show usage info
       if (strtoupper($_SERVER['REQUEST_METHOD'] ?? '') === 'GET') {
         j([
           'ok' => true,
@@ -38,8 +44,10 @@ try {
         ]);
       }
 
+      // POST → Actual login
       require_method('POST');
       $body = json_decode(file_get_contents('php://input'), true) ?: [];
+
       $email = strtolower(trim((string)($body['email'] ?? '')));
       $password = (string)($body['password'] ?? '');
       $tenantSlug = trim((string)($body['tenant'] ?? 'default'));
@@ -48,12 +56,16 @@ try {
         j(['ok' => false, 'error' => 'Email and password are required.'], 400);
       }
 
+      // Find tenant
       $tenantStmt = $pdo->prepare('SELECT id,name,slug,plan,status FROM tenants WHERE slug=?');
       $tenantStmt->execute([$tenantSlug]);
       $tenant = $tenantStmt->fetch();
+
       if (!$tenant) j(['ok' => false, 'error' => 'Tenant not found.'], 404);
 
-      $userStmt = $pdo->prepare('SELECT id, tenant_id, email, display_name, password_hash, status FROM users WHERE tenant_id=? AND email=?');
+      // Find user
+      $userStmt = $pdo->prepare('SELECT id, tenant_id, email, display_name, password_hash, status 
+        FROM users WHERE tenant_id=? AND email=?');
       $userStmt->execute([(int)$tenant['id'], $email]);
       $user = $userStmt->fetch();
 
@@ -65,11 +77,17 @@ try {
         j(['ok' => false, 'error' => 'Account is disabled for this workspace.'], 403);
       }
 
-      $rolesStmt = $pdo->prepare('SELECT r.slug FROM roles r JOIN user_roles ur ON ur.role_id=r.id WHERE ur.user_id=? ORDER BY r.slug');
+      // Load roles
+      $rolesStmt = $pdo->prepare('SELECT r.slug 
+        FROM roles r JOIN user_roles ur ON ur.role_id=r.id 
+        WHERE ur.user_id=? ORDER BY r.slug');
       $rolesStmt->execute([(int)$user['id']]);
       $roles = array_map(fn($r) => $r['slug'], $rolesStmt->fetchAll());
 
+      // Start session
       set_user_session((int)$user['id'], (int)$tenant['id'], $roles);
+
+      // Subscription status
       $subscription = tenant_subscription($pdo, (int)$tenant['id']);
 
       j([
@@ -92,12 +110,17 @@ try {
       ]);
     }
 
+    /* ============================================================
+       ME (session info)
+    ============================================================ */
     case 'me': {
       require_method('GET');
       $user = require_user($pdo);
+
       $tenantStmt = $pdo->prepare('SELECT id,name,slug,plan,status FROM tenants WHERE id=?');
       $tenantStmt->execute([(int)$user['tenant_id']]);
       $tenant = $tenantStmt->fetch();
+
       $subscription = tenant_subscription($pdo, (int)$user['tenant_id']);
 
       j([
@@ -114,45 +137,86 @@ try {
       ]);
     }
 
+    /* ============================================================
+       LOGOUT
+    ============================================================ */
     case 'logout': {
       require_method('POST');
       clear_user_session();
       j(['ok' => true]);
     }
 
+    /* ============================================================
+       LAYOUT LOAD
+    ============================================================ */
     case 'layout_load': {
       require_method('GET');
       $user = require_user($pdo);
-      $st = $pdo->prepare('SELECT layout FROM user_layouts WHERE user_id=? AND tenant_id=?');
+
+      $st = $pdo->prepare(
+        'SELECT layout FROM user_layouts WHERE user_id=? AND tenant_id=?'
+      );
       $st->execute([(int)$user['id'], (int)$user['tenant_id']]);
       $layout = $st->fetchColumn();
-      j(['ok' => true, 'layout' => $layout ? json_decode((string)$layout, true) : null]);
+
+      j([
+        'ok' => true,
+        'layout' => $layout ? json_decode((string)$layout, true) : null
+      ]);
     }
 
+    /* ============================================================
+       LAYOUT SAVE
+    ============================================================ */
     case 'layout_save': {
       require_method('POST');
       $user = require_user($pdo);
+
       $body = json_decode(file_get_contents('php://input'), true) ?: [];
       $layout = $body['layout'] ?? [];
-      if (!is_array($layout)) j(['ok' => false, 'error' => 'Layout must be an array'], 400);
+
+      if (!is_array($layout)) {
+        j(['ok' => false, 'error' => 'Layout must be an array'], 400);
+      }
 
       $payload = json_encode($layout, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-      $st = $pdo->prepare('INSERT INTO user_layouts(user_id, tenant_id, layout) VALUES(?,?,?) ON DUPLICATE KEY UPDATE layout=VALUES(layout)');
+
+      $st = $pdo->prepare(
+        'INSERT INTO user_layouts(user_id, tenant_id, layout)
+         VALUES(?,?,?)
+         ON DUPLICATE KEY UPDATE layout=VALUES(layout)'
+      );
       $st->execute([(int)$user['id'], (int)$user['tenant_id'], $payload]);
+
       j(['ok' => true]);
     }
 
+    /* ============================================================
+       LAYOUT CLEAR
+    ============================================================ */
     case 'layout_clear': {
       require_method('POST');
       $user = require_user($pdo);
-      $st = $pdo->prepare('DELETE FROM user_layouts WHERE user_id=? AND tenant_id=?');
+
+      $st = $pdo->prepare(
+        'DELETE FROM user_layouts WHERE user_id=? AND tenant_id=?'
+      );
       $st->execute([(int)$user['id'], (int)$user['tenant_id']]);
+
       j(['ok' => true]);
     }
 
+    /* ============================================================
+       UNKNOWN ACTION
+    ============================================================ */
     default:
       j(['ok' => false, 'error' => 'Unknown action'], 404);
   }
+
 } catch (Throwable $e) {
-  j(['ok' => false, 'error' => 'Server error', 'detail' => $e->getMessage()], 500);
+  j([
+    'ok' => false,
+    'error' => 'Server error',
+    'detail' => $e->getMessage()
+  ], 500);
 }

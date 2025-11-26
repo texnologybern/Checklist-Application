@@ -110,14 +110,21 @@ export class ApiAuthService implements AuthService {
   }
 
   private async request<T>(path: string, init?: RequestInit): Promise<T> {
-    const res = await fetch(`${this.baseUrl}${path}`, {
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(this.csrf ? { 'X-CSRF-Token': this.csrf } : {})
-      },
-      ...init
-    });
+    let res: Response;
+
+    try {
+      res = await fetch(`${this.baseUrl}${path}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(this.csrf ? { 'X-CSRF-Token': this.csrf } : {})
+        },
+        ...init
+      });
+    } catch (error) {
+      const message = `Cannot reach the API at ${this.baseUrl}. Start the PHP server (e.g. php -S 0.0.0.0:8000) or set VITE_USE_API_AUTH=false to use local demo mode.`;
+      throw new Error(message);
+    }
 
     const data = await res.json();
     if (!res.ok || !data.ok) {

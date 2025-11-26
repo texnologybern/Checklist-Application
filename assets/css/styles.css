@@ -48,210 +48,95 @@
   --switch-handle:#fff;
 }
 
+/* --- Global Resets --- */
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";color:var(--ink);background:var(--bg)}
 input,textarea,select{color:var(--ink)}
+/* Κλείδωμα scroll όταν ανοίγει edit σε κινητό */
 body.editing-open{overflow:hidden;}
 
 .page{max-width:1280px;margin:40px auto;padding:24px;width:100%}
 .card{background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);overflow:visible;width:100%}
+
+/* --- Header --- */
 header{padding:28px 28px 10px 28px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start}
 .title{font-size:28px;font-weight:800;letter-spacing:.2px}
 .subtitle{margin-top:6px;color:var(--muted);font-size:14px}
 .toolbar{display:flex;gap:10px;flex-wrap:wrap;position:relative;align-items:center}
 .toolbarButtons{display:flex;gap:10px;flex-wrap:wrap}
+
+/* --- Theme Switch --- */
 .themeSwitch{position:relative;display:inline-block;width:46px;height:24px}
 .themeSwitch input{opacity:0;width:0;height:0}
 .themeSwitch .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--border);transition:background .2s;border-radius:34px}
 .themeSwitch .slider:before{position:absolute;content:"";height:20px;width:20px;left:2px;bottom:2px;background:var(--switch-handle);border-radius:50%;transition:transform .2s;box-shadow:var(--shadow)}
 .themeSwitch input:checked+.slider{background:var(--accent)}
 .themeSwitch input:checked+.slider:before{transform:translateX(22px)}
+
+/* --- Buttons --- */
 .menuBtn{display:none;border:1px solid var(--border);background:var(--card);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:600;box-shadow:var(--shadow)}
 button{border:1px solid var(--border);background:var(--card);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:600;color:var(--ink);box-shadow:var(--shadow);transition:background-color .2s,color .2s,transform .1s}
 button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
 button.success{background:var(--accent2);color:#fff;border-color:var(--accent2)}
 button.danger{background:#ef4444;color:#fff;border-color:#ef4444}
 button:active{transform:translateY(1px)}
+
+/* FAB (Floating Action Button) - Βελτιωμένο Z-Index */
+button.fab{
+  display:none;
+  width:56px; height:56px; border-radius:50%;
+  background:var(--accent); color:#fff; border:none;
+  font-size:32px; line-height:1;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+  justify-content:center; align-items:center;
+  position:fixed; bottom:24px; right:24px;
+  z-index: 9999; /* Πάνω από όλα για να πατιέται σίγουρα */
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+button.fab:active {
+  transform: scale(0.9);
+  background: var(--accent2);
+}
+
+/* --- Layout Components --- */
 .meta{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:0 28px 18px 28px}
 .meta .field{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px;min-width:0}
 .meta label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
 .meta input{width:100%;border:none;outline:none;background:transparent;font-weight:600}
+
 .progressWrap{position:sticky;top:0;z-index:20;padding:10px 28px 2px 28px;background:var(--card);box-shadow:var(--shadow)}
 .progressLabel{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px}
 .progress{height:12px;background:var(--card);border:1px solid var(--border);border-radius:999px;overflow:hidden;position:relative}
 .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .25s ease}
 .sectionTitle{padding:14px 28px 6px 28px;font-weight:800;color:var(--ink);letter-spacing:.2px}
 
-/* Notes header + summary */
-.notesSummary,
-.notesHeader{ display:flex; align-items:center; justify-content:space-between; }
+/* Notes Header */
+.notesSummary, .notesHeader{ display:flex; align-items:center; justify-content:space-between; }
 .notesSummary{cursor:pointer;}
 .notesSummary::-webkit-details-marker{display:none;}
 .notesSummary::marker{content:"";}
 .notesSummary::after{content:'▼';font-size:18px;}
 #notesPanel[open] .notesSummary::after{content:'▲';}
 .notesHeader button{border:none;background:none;font-size:18px;cursor:pointer;line-height:1;padding:0;transition:transform .15s;}
-.notesHeader button:hover{transform:scale(1.1);}
 
-/* Add form (responsive) */
+/* Add Form */
 .addForm{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;padding:0 28px 12px}
 .addForm input,.addForm textarea,.addForm select{border:1px solid var(--border);border-radius:12px;padding:10px;min-width:0;width:100%}
 .addForm select{-webkit-appearance:none;appearance:none;padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23677389' d='M5 6L0 0h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:10px}
 .addForm .dateInputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
 .addForm .dateInputs input{ text-align:center; }
 
-/* Tasks (base) */
-ul.tasks{list-style:none;margin:0;padding:8px 18px 24px 18px;display:grid;gap:10px}
-.task{border:1px solid var(--border);border-radius:16px;padding:12px;display:grid;grid-template-columns:26px 28px minmax(0,1fr) auto;gap:12px;align-items:start;background:var(--card)}
-.task input[type="checkbox"]{margin-top:4px;transform:scale(1.35);accent-color:var(--accent2);cursor:pointer}
-.task label{font-weight:700;display:block}
-.desc{color:var(--muted);font-size:13px;margin-top:4px;word-break:break-word;overflow-wrap:anywhere}
-.note{margin-top:10px;width:100%;border:1px solid var(--border);padding:10px 12px;border-radius:10px;font-size:13px;word-break:break-word;overflow-wrap:anywhere}
-.del{border:1px solid #fecaca;background:#fee2e2;color:#b91c1c}
-.badge{display:inline-block;font-size:11px;font-weight:700;color:#065f46;background:#d1fae5;border:1px solid #a7f3d0;padding:3px 8px;border-radius:999px;margin-left:6px}
-.notesWrap{padding:0 28px 28px 28px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.notesWrap textarea{width:100%;min-height:150px;border:1px solid var(--border);border-radius:12px;padding:12px;min-width:0}
-footer{padding:14px 28px 28px 28px;color:var(--muted);font-size:12px}
-
-button.fab{display:none;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:32px;line-height:1;box-shadow:var(--shadow);justify-content:center;align-items:center}
 #addModal .box{width:90%;max-width:500px}
 #addModal .addForm{padding:0;grid-template-columns:1fr}
 
-/* Filters side panel */
-.filters-panel{position:fixed;inset:0;background:rgba(0,0,0,.4);transform:translateX(100%);transition:transform .3s ease;display:flex;justify-content:flex-end;pointer-events:none;z-index:1000}
-.filters-panel .panel{width:80%;max-width:360px;background:var(--card);padding:20px;height:100%;overflow:auto;box-shadow:var(--shadow)}
-.filters-panel.open{transform:translateX(0);pointer-events:auto}
-@media (min-width:769px){
-  .filters-panel{position:static;transform:none;background:none;display:block;pointer-events:auto;transition:none}
-  .filters-panel .panel{width:auto;max-width:none;padding:0;height:auto;box-shadow:none}
-}
-
-/* Mobile ≤768 */
-@media (max-width:768px){
-  header{display:flex;flex-direction:column;gap:12px;align-items:stretch}
-  .titleWrap{order:2;text-align:center}
-  .toolbar{order:1;flex-wrap:nowrap}
-  .toolbar #menuBtn{order:1}
-  .toolbar #filtersBtn{order:2;margin-left:auto}
-  .toolbar .themeSwitch{order:3}
-  .meta{grid-template-columns:1fr 1fr}
-  .addForm{grid-template-columns:1fr}
-  .notesWrap{grid-template-columns:1fr}
-  .filters{grid-template-columns:1fr 1fr}
-  .toolbarButtons{display:none;flex-direction:column;position:absolute;top:100%;left:0;background:var(--card);padding:10px;border:1px solid var(--border);border-radius:12px;gap:10px}
-  .toolbar.open .toolbarButtons{display:flex}
-  .menuBtn{display:block}
-}
-
-/* Mobile ≤480 (Codex tweaks merged) */
-@media (max-width:480px){
-  .page{padding:clamp(12px,5vw,20px)}
-  .meta{grid-template-columns:1fr;padding:0 clamp(12px,5vw,20px) 18px}
-  ul.tasks{grid-template-columns:1fr;padding:8px clamp(12px,5vw,20px) 24px}
-  .notesWrap{grid-template-columns:1fr;padding:0 clamp(12px,5vw,28px)}
-  .filters{grid-template-columns:1fr;padding:0 clamp(12px,5vw,12px)}
-  #addSectionTitle,.sidebar .addForm{display:none}
-  button.fab{display:flex;position:fixed;bottom:20px;right:20px}
-  .tagPrio{grid-template-columns:1fr}
-
-  .editForm .dateInputs{grid-template-columns:1fr}
-  .addForm .dateInputs{grid-template-columns:1fr}
-
-  .task{
-    grid-template-columns:26px minmax(0,1fr);
-    grid-template-areas:
-      "handle actions"
-      "checkbox content";
-    gap:8px;
-    padding:clamp(14px,5vw,22px);
-  }
-  .task .handle{grid-area:handle;}
-  .task>input[type="checkbox"]{grid-area:checkbox;margin-top:2px;}
-  .task .content{grid-area:content;}
-  .task .actions{grid-area:actions;justify-content:flex-end;gap:6px;}
-  .task .actions button{width:36px;height:36px;}
-  .task label{font-size:clamp(1rem,4.5vw,1.25rem)}
-  .task .desc,.task .note{font-size:clamp(.875rem,3.8vw,1rem)}
-
-  /* στο mobile οι ημερομηνίες στοιχίζονται κάθετα */
-  .task .dates{flex-direction:column;align-items:flex-start}
-  .task .dates .sep{display:none}
-
-  /* Better touch targets for note input on very small screens */
-  .addNote{flex-direction:column;align-items:stretch;}
-  .addNote button{width:100%;padding:10px;}
-
-  /* Full-screen editor on mobile */
-  .task.editing{
-    grid-template-columns:1fr;
-    position:fixed;
-    inset:0;
-    padding:20px 16px;
-    background:var(--card);
-    border-radius:0;
-    overflow:auto;
-    z-index:1000;
-    box-shadow:none;
-    border:none;
-    animation:slideUp .25s ease;
-  }
-  .task.editing .handle,
-  .task.editing > input[type="checkbox"]{ display:none; }
-  .editForm input, .editForm textarea, .editForm select{font-size:16px;padding:14px;}
-  .editBtns{flex-direction:column;gap:10px;}
-  .editBtns button{width:100%;}
-}
-
-/* Desktop wide */
-@media (min-width:1024px){
-  .page{max-width:1280px}
-  .card{display:grid;grid-template-columns:2fr 1fr;}
-  .card>header{grid-column:1/-1}
-  .filters, .addForm{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
-}
-
-@media (max-width:1023px){
-  .card{display:block}
-}
-
-/* Print */
-@media print{
-  body{background:var(--card)}
-  .page{margin:0}
-  .toolbar,.filters,.meta,.notesWrap,footer{display:none}
-  .card{box-shadow:none}
-  button{display:none}
-
-  ul.tasks{padding:0}
-  .task{box-shadow:none;border:1px solid #d1d5db;border-radius:8px;padding:6px;background:transparent}
-  .task .handle,.task .actions{display:none}
-  .task input[type="checkbox"]{transform:none;margin-top:0}
-}
-
-/* Filters bar (responsive) */
-.filters{padding:0 28px 12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
-.filters input:not([type="checkbox"]),.filters select{border:1px solid var(--border);border-radius:12px;padding:10px;background:var(--card);width:100%;min-width:0}
-.filters select{-webkit-appearance:none;appearance:none;padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23677389' d='M5 6L0 0h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:10px}
-.filters .onlyPending input{width:auto;transform:scale(1.2);accent-color:var(--accent2)}
-.filters .onlyPending{display:flex;align-items:center;gap:8px;min-width:0}
-
-/* Tag chips & priority badges */
-.chips{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
-.chip{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--border);background:var(--card)}
-.badge.p1{background:#fee2e2;border-color:#fecaca;color:#991b1b} /* High */
-.badge.p2{background:#dbeafe;border-color:#bfdbfe;color:#1e3a8a} /* Medium */
-.badge.p3{background:#dcfce7;border-color:#bbf7d0;color:#14532d} /* Low */
-
-/* Drag handle */
-.handle{cursor:grab;user-select:none;font-size:18px;line-height:1;padding:4px 6px}
-.task.dragging{opacity:.6}
-
-/* ===== Task Card Redesign (overrides) ===== */
-ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
+/* --- TASKS (Desktop Default) --- */
+ul.tasks{list-style:none;margin:0;padding:8px 18px 24px 18px;display:grid;gap:10px}
 
 .task{
   display: grid;
-  grid-template-columns: 26px 28px minmax(0,1fr) auto; /* handle | checkbox | content | actions */
+  /* Desktop layout: Handle | Checkbox | Content | Actions */
+  grid-template-columns: 26px 28px minmax(0,1fr) auto;
   align-items: center;
   gap: 12px;
   padding: 12px 12px;
@@ -259,9 +144,19 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
   border: 1px solid var(--border);
   border-radius: 16px;
   box-shadow: var(--shadow);
-  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background-color .12s ease;
+  transition: transform .15s ease, box-shadow .15s ease;
+  /* Hardware acceleration for smooth animations */
+  transform: translateZ(0);
+  will-change: transform, box-shadow;
 }
-.task:hover{ transform: translateY(-1px); border-color:var(--border); box-shadow: 0 10px 24px rgba(2,6,23,.10); }
+
+/* Hover effects only on devices that support hover */
+@media (hover: hover) {
+  .task:hover{ transform: translateY(-1px); border-color:var(--border); box-shadow: 0 10px 24px rgba(2,6,23,.10); }
+  .task .handle:hover{ color:var(--ink); transform:scale(1.1); }
+  .task .del:hover{ background:#fee2e2; border-color:#fecaca; color:#991b1b; transform:scale(1.1); }
+  .actions .edit:hover{ background:var(--border); transform:scale(1.1); }
+}
 
 .task .handle{
   cursor: grab; user-select: none; color:var(--muted);
@@ -269,10 +164,9 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
   width: 22px; height: 22px; border-radius: 6px;
   transition: color .2s, transform .15s;
 }
-.task .handle:hover{ color:var(--ink); transform:scale(1.1); }
 .task .handle:active{ cursor: grabbing; }
 
-.task input[type="checkbox"]{ margin: 0 auto; transform: scale(1.25); accent-color: var(--accent2); }
+.task input[type="checkbox"]{ margin: 0 auto; transform: scale(1.25); accent-color: var(--accent2); cursor: pointer; }
 
 .task .content{ display: grid; row-gap: 6px; min-width:0; }
 .task .content .titleRow{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
@@ -286,7 +180,6 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
   width: 32px; height: 32px; border-radius: 10px; display:flex; align-items:center; justify-content:center;
   transition: background-color .2s, color .2s, transform .15s;
 }
-.task .del:hover{ background:#fee2e2; border-color:#fecaca; color:#991b1b; transform:scale(1.1); }
 
 .actions{ display:flex; gap:8px; justify-content:flex-end; align-items:center; }
 .actions .edit{
@@ -294,39 +187,32 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
   width: 32px; height: 32px; border-radius: 10px; display:flex; align-items:center; justify-content:center;
   transition: background-color .2s, transform .15s;
 }
-.actions .edit:hover{ background:var(--border); transform:scale(1.1); }
 
-/* Completed state */
-.task.done{ background:var(--card); }
+.task.done{ background:var(--card); opacity: 0.8; }
 .task.done label{ color:var(--muted); text-decoration: line-through; }
 
-/* Task dates (flex so να “σπάει” στο mobile) */
 .task .dates{
-  display:flex;
-  align-items:center;
-  gap:4px;
-  font-size:12px;
-  color:var(--muted);
-  margin-top:4px;
+  display:flex; align-items:center; gap:4px;
+  font-size:12px; color:var(--muted); margin-top:4px;
 }
 .task .dates::before{ content:'📅'; }
 .task .dates .sep{ margin:0 2px; }
 .task .dates .due{ color:var(--accent); font-weight:600; }
 
-/* Editing state */
+/* Tags & Badges */
+.chips{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--border);background:var(--card)}
+.badge{display:inline-block;font-size:11px;font-weight:700;color:#065f46;background:#d1fae5;border:1px solid #a7f3d0;padding:3px 8px;border-radius:999px;margin-left:6px}
+.badge.p1{background:#fee2e2;border-color:#fecaca;color:#991b1b} 
+.badge.p2{background:#dbeafe;border-color:#bfdbfe;color:#1e3a8a} 
+.badge.p3{background:#dcfce7;border-color:#bbf7d0;color:#14532d} 
+
+/* --- Editing State (Desktop) --- */
 .task.editing{ grid-template-columns:1fr; }
 .task.editing .handle,
 .task.editing > input[type="checkbox"],
 .task.editing .actions{ display:none; }
 
-/* Visibility helper */
-.hidden{ display:none !important; }
-
-/* Generic fade helpers */
-.fade{ transition:opacity .2s ease, transform .2s ease; }
-.fade.fade-out{ opacity:0; transform:translateY(-4px); }
-
-/* Edit form (smooth expand/collapse) */
 .task .editForm{
   border:1px dashed var(--border);
   background:var(--card);
@@ -337,9 +223,8 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
   transform:scale(.98);
   margin-top:0;
   padding:0 10px;
-  transition:max-height .2s ease, opacity .2s ease, transform .2s ease, margin-top .2s ease, padding .2s ease;
-  /* προαιρετικό: */
-  /* will-change: max-height, opacity, transform; */
+  transition: max-height .3s cubic-bezier(0.4, 0, 0.2, 1), opacity .2s ease, transform .2s ease, margin-top .2s ease;
+  will-change: max-height, opacity;
 }
 .task .editForm.open{
   max-height:1000px;
@@ -348,50 +233,288 @@ ul.tasks { gap: 14px; padding: 10px 18px 28px 18px; }
   margin-top:6px;
   padding:10px;
 }
-
-/* Edit form fields */
 .editForm .row{ display:grid; grid-template-columns:1fr; gap:8px; }
 .editForm input, .editForm textarea, .editForm select{ border:1px solid var(--border); border-radius:10px; padding:10px; width:100%; }
-.editForm select{-webkit-appearance:none;appearance:none;padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23677389' d='M5 6L0 0h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:10px}
 .tagPrio{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 .editForm .dateInputs{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-.editForm .dateInputs input{ text-align:center; }
 .editBtns{ display:flex; gap:8px; justify-content:flex-end; }
 
-/* Notes thread */
+/* --- Notes Thread (Inside Task) --- */
 .taskNotes{ margin-top:6px; }
 .taskNotes:not([open]){ overflow:hidden; }
-.taskNotes summary{ cursor:pointer; display:flex; align-items:center; justify-content:space-between; font-weight:600; }
+.taskNotes summary{ cursor:pointer; display:flex; align-items:center; justify-content:space-between; font-weight:600; margin-bottom: 8px; }
 .taskNotes summary::-webkit-details-marker{ display:none; }
 .taskNotes summary::marker{ content:""; }
 .taskNotes summary::after{ content:'▼'; font-size:14px; transition:transform .2s; }
 .taskNotes[open] summary::after{ transform:rotate(180deg); }
 
-/* Notes expand/collapse */
+/* ΔΙΟΡΘΩΣΗ: Animations για το άνοιξε-κλείσε (απαραίτητα για τη JS) */
 .taskNotes .addNote,
-.taskNotes .notesThread{ max-height:0; opacity:0; overflow:hidden; transition:max-height .25s ease, opacity .25s ease; }
-.taskNotes.opening .addNote,
-.taskNotes.opening .notesThread{ max-height:1000px; opacity:1; }
+.taskNotes .notesThread {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin-top: 0;
+  transition: max-height 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease;
+}
 
-.addNote{ margin-top:6px; display:flex; gap:8px; }
-.addNote input{ flex:1; border:1px solid var(--border); border-radius:10px; padding:8px 10px; }
-.addNote button{ border:1px solid var(--border); border-radius:10px; padding:6px 10px; background:var(--card); transition:background-color .2s, transform .15s; }
-.addNote button:hover{ background:var(--border); transform:scale(1.1); }
+.taskNotes.opening .addNote {
+  max-height: 60px; /* Αρκετό για το input */
+  opacity: 1;
+  margin-top: 6px;
+}
 
-.notesThread{ margin-top:6px; border-left:3px solid var(--border); padding-left:10px; display:grid; gap:6px; }
+.taskNotes.opening .notesThread {
+  max-height: 1000px; /* Αρκετό για τις σημειώσεις */
+  opacity: 1;
+  margin-top: 10px;
+}
+
+/* Note Input Area - Επαναφορά του + Button στο αρχικό στυλ */
+.addNote {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  /* Το margin ελέγχεται από το animation παραπάνω */
+}
+
+.addNote input {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.addNote button {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 14px;
+  background: var(--card);
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color .2s, transform .15s;
+  cursor: pointer;
+}
+
+.addNote button:active {
+  transform: scale(0.95);
+  background: var(--border);
+}
+
+@media (hover: hover) {
+  .addNote button:hover {
+    background: var(--border);
+    transform: scale(1.05);
+  }
+}
+
+.notesThread {
+  border-left: 3px solid var(--border);
+  padding-left: 10px;
+  display: grid;
+  gap: 8px;
+  /* Το margin ελέγχεται από το animation παραπάνω */
+}
+
 .noteItem{ background:var(--card); border:1px solid var(--border); border-radius:10px; padding:8px 10px; word-break:break-word; overflow-wrap:anywhere; }
-.noteMeta{ font-size:11px; color:var(--muted); margin-top:2px; }
-
+.noteMeta{ font-size:11px; color:var(--muted); margin-top:4px; text-align: right; }
 .noteItem .noteRow{ display:flex; gap:8px; align-items:flex-start; justify-content:space-between; }
 .noteDel{
   border:1px solid var(--border);
   background:var(--card);
   border-radius:8px;
-  padding:3px 6px;
+  padding:4px 8px;
   cursor:pointer;
-  font-size:12px;
-  transition:background-color .2s, color .2s, transform .15s;
+  font-size:14px;
 }
-.noteDel:hover{
-  background:#fee2e2; border-color:#fecaca; color:#991b1b; transform:scale(1.1);
+@media (hover: hover) { .noteDel:hover{ background:#fee2e2; border-color:#fecaca; color:#991b1b; transform:scale(1.1); } }
+
+/* --- Footer & Global Notes --- */
+.notesWrap{padding:0 28px 28px 28px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.notesWrap textarea{width:100%;min-height:150px;border:1px solid var(--border);border-radius:12px;padding:12px;min-width:0}
+footer{padding:14px 28px 28px 28px;color:var(--muted);font-size:12px}
+
+/* --- Filters Panel --- */
+.filters-panel{position:fixed;inset:0;background:rgba(0,0,0,.4);transform:translateX(100%);transition:transform .3s ease;display:flex;justify-content:flex-end;pointer-events:none;z-index:1000}
+.filters-panel .panel{width:80%;max-width:360px;background:var(--card);padding:20px;height:100%;overflow:auto;box-shadow:var(--shadow)}
+.filters-panel.open{transform:translateX(0);pointer-events:auto}
+.filters{padding:0 28px 12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.filters input:not([type="checkbox"]),.filters select{border:1px solid var(--border);border-radius:12px;padding:10px;background:var(--card);width:100%;min-width:0}
+.filters .onlyPending input{width:auto;transform:scale(1.2);accent-color:var(--accent2)}
+.filters .onlyPending{display:flex;align-items:center;gap:8px;min-width:0}
+
+/* --- Media Queries --- */
+
+/* Desktop */
+@media (min-width:1024px){
+  .page{max-width:1280px}
+  .card{display:grid;grid-template-columns:2fr 1fr;}
+  .card>header{grid-column:1/-1}
+  .filters, .addForm{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+}
+@media (max-width:1023px){ .card{display:block} }
+
+@media (min-width:769px){
+  .filters-panel{position:static;transform:none;background:none;display:block;pointer-events:auto;transition:none}
+  .filters-panel .panel{width:auto;max-width:none;padding:0;height:auto;box-shadow:none}
+}
+
+/* Tablet / Small Desktop */
+@media (max-width:768px){
+  header{display:flex;flex-direction:column;gap:12px;align-items:stretch}
+  .toolbar{order:1;flex-wrap:nowrap}
+  .toolbar #menuBtn{order:1}
+  .toolbar #filtersBtn{order:2;margin-left:auto}
+  .toolbar .themeSwitch{order:3}
+  .meta{grid-template-columns:1fr 1fr}
+  .addForm, .notesWrap, .filters{grid-template-columns:1fr}
+  .toolbarButtons{display:none;flex-direction:column;position:absolute;top:100%;left:0;background:var(--card);padding:10px;border:1px solid var(--border);border-radius:12px;gap:10px;z-index: 50;}
+  .toolbar.open .toolbarButtons{display:flex}
+  .menuBtn{display:block}
+}
+
+/* --- MOBILE FIX (CRITICAL) --- */
+@media (max-width:480px){
+  .page{padding:16px;}
+  .meta{grid-template-columns:1fr;padding:0 16px 18px}
+  ul.tasks{grid-template-columns:1fr;padding:8px 16px 24px}
+  .notesWrap{grid-template-columns:1fr;padding:0 16px 28px}
+  .filters{grid-template-columns:1fr;padding:0 16px 12px}
+  #addSectionTitle,.sidebar .addForm{display:none}
+  button.fab{display:flex;}
+  
+  .tagPrio, .editForm .dateInputs, .addForm .dateInputs{grid-template-columns:1fr}
+
+  /* 1. Reset Task Grid for Mobile to be simpler */
+  .task {
+    /* 2 Columns: Handle | Content (Checkbox inside content via flex if needed, but sticking to grid) */
+    grid-template-columns: 26px minmax(0, 1fr); 
+    grid-template-areas: 
+      "handle actions"
+      "checkbox content";
+    gap: 10px;
+    padding: 14px;
+  }
+  
+  .task .handle { grid-area: handle; align-self: center; }
+  .task > input[type="checkbox"] { grid-area: checkbox; margin-top: 4px; justify-self: center; }
+  .task .content { grid-area: content; width: 100%; }
+  
+  .task .actions { 
+    grid-area: actions; 
+    justify-content: flex-end; 
+    width: 100%; 
+    margin-bottom: 4px;
+  }
+
+  .task label { font-size: 16px; }
+  
+  /* Dates Stack Vertically */
+  .task .dates { flex-direction: column; align-items: flex-start; }
+  .task .dates .sep { display: none; }
+
+  /* 2. FULL SCREEN EDIT MODE (The Fix) */
+  /* Όταν η κάρτα είναι σε edit mode, γίνεται full screen overlay */
+  .task.editing {
+    display: block; /* Stop being a grid */
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 3000; /* Πάνω από όλα */
+    margin: 0;
+    border-radius: 0;
+    padding: 0;
+    overflow-y: auto;
+    background: var(--bg); /* Κάλυψη του από πίσω */
+  }
+
+  /* Hide elements irrelevant to full screen edit */
+  .task.editing .handle,
+  .task.editing > input[type="checkbox"],
+  .task.editing .actions { display: none !important; }
+
+  /* Content container takes full width */
+  .task.editing .content {
+    width: 100%;
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* Show form properly */
+  .task.editing .editForm {
+    display: block;
+    margin-top: 20px;
+    padding: 20px;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    max-height: none;
+    opacity: 1;
+    transform: none;
+  }
+  
+  .task.editing .editForm.open {
+    max-height: none;
+  }
+
+  /* Style inputs for mobile touch */
+  .editForm input, .editForm textarea, .editForm select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+
+  /* Stack Buttons */
+  .editBtns {
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .editBtns button {
+    width: 100%;
+    padding: 16px;
+    font-size: 16px;
+  }
+  
+  /* Hide original content while editing to avoid duplicates visually */
+  .task.editing .content .titleRow,
+  .task.editing .content .desc,
+  .task.editing .content .dates,
+  .task.editing .content .chips,
+  .task.editing .content .taskNotes {
+    display: none; 
+  }
+}
+
+/* Animation for Edit Modal Slide Up */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.task.editing {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Modal / Overlay */
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;animation:fadeIn .25s; z-index: 4000;}
+.modal.hidden{display:none;}
+.modal .box{background:var(--card);padding:20px;border-radius:12px;box-shadow:var(--shadow);text-align:center;animation:scaleIn .25s;}
+.modal .actions{margin-top:16px;display:flex;gap:10px;justify-content:center;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes scaleIn{from{transform:scale(.9);}to{transform:scale(1);} }
+
+@media print{
+  body{background:var(--card)}
+  .page{margin:0}
+  .toolbar,.filters,.meta,.notesWrap,footer{display:none}
+  .card{box-shadow:none}
+  button{display:none}
+  ul.tasks{padding:0}
+  .task{box-shadow:none;border:1px solid #d1d5db;border-radius:8px;padding:6px;background:transparent}
+  .task .handle,.task .actions{display:none}
+  .task input[type="checkbox"]{transform:none;margin-top:0}
 }

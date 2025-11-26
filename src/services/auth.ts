@@ -2,6 +2,7 @@ export interface AuthCredentials {
   email: string;
   password: string;
   remember?: boolean;
+  tenant?: string;
 }
 
 export interface AuthSession {
@@ -10,6 +11,10 @@ export interface AuthSession {
   displayName: string;
   token: string;
   lastAuthenticatedAt: number;
+  tenantId?: number;
+  tenantSlug?: string;
+  roles?: string[];
+  subscription?: { plan: string; status: string; seats?: number; endsAt?: string | null } | null;
 }
 
 export interface AuthService {
@@ -92,6 +97,105 @@ export class LocalAuthService implements AuthService {
   async logout(): Promise<void> {
     if (this.storage) {
       this.storage.removeItem(SESSION_KEY);
+    }
+  }
+}
+
+export class ApiAuthService implements AuthService {
+  private readonly baseUrl: string;
+  private csrf: string | null = null;
+
+  constructor(baseUrl = '/saas_api.php') {
+    this.baseUrl = baseUrl;
+  }
+
+  private async request<T>(path: string, init?: RequestInit): Promise<T> {
+    const res = await fetch(`${this.baseUrl}${path}`, {
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(this.csrf ? { 'X-CSRF-Token': this.csrf } : {})
+      },
+      ...init
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      throw new Error(data?.error || 'Request failed');
+    }
+
+    if (data.csrf) {
+      this.csrf = data.csrf;
+    }
+
+    return data as T;
+  }
+
+  async login(credentials: AuthCredentials): Promise<AuthSession> {
+    const tenant = credentials.tenant || import.meta.env.VITE_TENANT_SLUG || 'default';
+    const payload = { ...credentials, tenant };
+
+    const data = await this.request<any>(`?action=login`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    const subscription = data.subscription
+      ? {
+          plan: data.subscription.plan ?? 'free',
+          status: data.subscription.status ?? 'active',
+          seats: data.subscription.seats ?? undefined,
+          endsAt: data.subscription.ends_at ?? null
+        }
+      : null;
+
+    return {
+      id: String(data.user.id),
+      email: data.user.email,
+      displayName: data.user.displayName ?? data.user.email,
+      token: data.csrf || crypto.randomUUID(),
+      lastAuthenticatedAt: Date.now(),
+      tenantId: data.tenant?.id,
+      tenantSlug: data.tenant?.slug,
+      roles: data.user.roles ?? [],
+      subscription
+    };
+  }
+
+  async getSession(): Promise<AuthSession | null> {
+    try {
+      const data = await this.request<any>(`?action=me`, { method: 'GET' });
+
+      const subscription = data.subscription
+        ? {
+            plan: data.subscription.plan ?? 'free',
+            status: data.subscription.status ?? 'active',
+            seats: data.subscription.seats ?? undefined,
+            endsAt: data.subscription.ends_at ?? null
+          }
+        : null;
+
+      return {
+        id: String(data.user.id),
+        email: data.user.email,
+        displayName: data.user.displayName ?? data.user.email,
+        token: data.csrf || crypto.randomUUID(),
+        lastAuthenticatedAt: Date.now(),
+        tenantId: data.tenant?.id,
+        tenantSlug: data.tenant?.slug,
+        roles: data.user.roles ?? [],
+        subscription
+      };
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await this.request(`?action=logout`, { method: 'POST' });
+    } finally {
+      this.csrf = null;
     }
   }
 }

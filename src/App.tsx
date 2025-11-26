@@ -4,8 +4,8 @@ import { DraggableBoard } from './features/board/DraggableBoard';
 import type { BoardCard } from './features/board/types';
 import { useAuth } from './hooks/useAuth';
 import { useReducedMotionPref } from './hooks/useReducedMotionPref';
-import { LocalAuthService } from './services/auth';
-import { LocalLayoutService } from './services/layoutService';
+import { ApiAuthService, LocalAuthService } from './services/auth';
+import { ApiLayoutService, LocalLayoutService } from './services/layoutService';
 
 const defaultCards: BoardCard[] = [
   {
@@ -42,8 +42,16 @@ const defaultCards: BoardCard[] = [
  */
 const App = () => {
   const reducedMotion = useReducedMotionPref();
-  const authService = useMemo(() => new LocalAuthService(), []);
-  const layoutService = useMemo(() => new LocalLayoutService(), []);
+  const useApiBackend = (import.meta.env.VITE_USE_API_AUTH ?? 'false') === 'true';
+  const apiBase = import.meta.env.VITE_API_BASE ?? '/saas_api.php';
+  const authService = useMemo(
+    () => (useApiBackend ? new ApiAuthService(apiBase) : new LocalAuthService()),
+    [apiBase, useApiBackend]
+  );
+  const layoutService = useMemo(
+    () => (useApiBackend ? new ApiLayoutService(apiBase) : new LocalLayoutService()),
+    [apiBase, useApiBackend]
+  );
   const { status, session, login, logout, error, clearError } = useAuth(authService);
   const [cards, setCards] = useState<BoardCard[]>(defaultCards);
   const [isPersisting, setIsPersisting] = useState(false);

@@ -38,9 +38,9 @@ function fmt_dt(?string $s): ?string {
   $d = date_create($s);
   return $d ? $d->format('Y-m-d\TH:i') : null;
 }
-function progress(PDO $pdo, int $list_id): array {
-  $s = $pdo->prepare('SELECT SUM(checked) AS done, COUNT(*) AS total FROM tasks WHERE list_id=?');
-  $s->execute([$list_id]); $r = $s->fetch();
+function progress(PDO $pdo, int $list_id, int $tenant_id): array {
+  $s = $pdo->prepare('SELECT SUM(checked) AS done, COUNT(*) AS total FROM tasks WHERE list_id=? AND tenant_id=?');
+  $s->execute([$list_id, $tenant_id]); $r = $s->fetch();
   $done = (int)($r['done'] ?? 0);
   $total = (int)($r['total'] ?? 0);
   $pct = $total > 0 ? (int)round($done / $total * 100) : 0;
@@ -49,6 +49,11 @@ function progress(PDO $pdo, int $list_id): array {
 
 try {
   $pdo = DB::conn();
+  $tenant_id = current_tenant_id();
+
+  if (!list_belongs_to_tenant($pdo, $list_id, $tenant_id)) {
+    j(['ok'=>false,'error'=>'List not found for tenant'], 404);
+  }
 
   // runtime feature detection (ώστε να λειτουργεί ακόμη κι αν λείπουν migrations)
   $hasPriority = col_exists($pdo, 'tasks', 'priority');
@@ -68,10 +73,10 @@ try {
       $sel .= $hasTags     ? ',tags'     : ",'' AS tags";
       $sel .= $hasStart    ? ',start_date' : ',NULL AS start_date';
       $sel .= $hasDue      ? ',due_date'   : ',NULL AS due_date';
-      $sel .= ' FROM tasks WHERE list_id=? ORDER BY position,id';
+      $sel .= ' FROM tasks WHERE list_id=? AND tenant_id=? ORDER BY position,id';
 
       $q = $pdo->prepare($sel);
-      $q->execute([$list_id]);
+      $q->execute([$list_id, $tenant_id]);
       $tasks = $q->fetchAll();
       foreach ($tasks as &$t) {
         $t['checked'] = (int)$t['checked'];
@@ -80,14 +85,14 @@ try {
         if (isset($t['due_date']))   $t['due_date']   = fmt_dt($t['due_date']);
       }
 
-      $q2 = $pdo->prepare('SELECT id,name,location,date_label,owner,phone,notes,materials FROM lists WHERE id=?');
-      $q2->execute([$list_id]); $meta = $q2->fetch() ?: [];
+      $q2 = $pdo->prepare('SELECT id,name,location,date_label,owner,phone,notes,materials FROM lists WHERE id=? AND tenant_id=?');
+      $q2->execute([$list_id, $tenant_id]); $meta = $q2->fetch() ?: [];
 
       j([
         'ok'=>true,
         'tasks'=>$tasks,
         'meta'=>$meta,
-        'progress'=>progress($pdo,$list_id),
+        'progress'=>progress($pdo,$list_id,$tenant_id),
         'csrf'=>csrf_token()
       ]);
     }
@@ -97,7 +102,7 @@ try {
       $b = json_decode(file_get_contents('php://input'), true) ?: [];
       $id = (int)($b['id'] ?? 0);
       $checked = !empty($b['checked']) ? 1 : 0;
-      $pdo->prepare('UPDATE tasks SET checked=? WHERE id=? AND list_id=?')->execute([$checked,$id,$list_id]);
+      $pdo->prepare('UPDATE tasks SET checked=? WHERE id=? AND list_id=? AND tenant_id=?')->execute([$checked,$id,$list_id,$tenant_id]);
       j(['ok'=>true]);
     }
 
@@ -106,7 +111,7 @@ try {
       $b = json_decode(file_get_contents('php://input'), true) ?: [];
       $id = (int)($b['id'] ?? 0);
       $note = trim((string)($b['note'] ?? ''));
-      $pdo->prepare('UPDATE tasks SET note=? WHERE id=? AND list_id=?')->execute([$note,$id,$list_id]);
+      $pdo->prepare('UPDATE tasks SET note=? WHERE id=? AND list_id=? AND tenant_id=?')->execute([$note,$id,$list_id,$tenant_id]);
       j(['ok'=>true]);
     }
 
@@ -121,12 +126,12 @@ try {
       $start = norm_dt(trim((string)($b['start_date'] ?? '')) ?: null);
       $due   = norm_dt(trim((string)($b['due_date']   ?? '')) ?: null);
 
-      $posS = $pdo->prepare('SELECT COALESCE(MAX(position),0)+1 FROM tasks WHERE list_id=?');
-      $posS->execute([$list_id]); $pos = (int)$posS->fetchColumn();
+      $posS = $pdo->prepare('SELECT COALESCE(MAX(position),0)+1 FROM tasks WHERE list_id=? AND tenant_id=?');
+      $posS->execute([$list_id,$tenant_id]); $pos = (int)$posS->fetchColumn();
 
-      $fields = ['list_id','title','description','position'];
-      $place  = ['?','?','?','?'];
-      $vals   = [$list_id,$title,$desc,$pos];
+      $fields = ['list_id','tenant_id','title','description','position'];
+      $place  = ['?','?','?','?','?'];
+      $vals   = [$list_id,$tenant_id,$title,$desc,$pos];
       if ($hasPriority) { $fields[]='priority'; $place[]='?'; $vals[]=$prio; }
       if ($hasTags)     { $fields[]='tags';     $place[]='?'; $vals[]=$tags; }
       if ($hasStart)    { $fields[]='start_date';$place[]='?'; $vals[]=$start; }
@@ -140,10 +145,10 @@ try {
       $sel .= $hasTags     ? ',tags'     : ",'' AS tags";
       $sel .= $hasStart    ? ',start_date' : ',NULL AS start_date';
       $sel .= $hasDue      ? ',due_date'   : ',NULL AS due_date';
-      $sel .= ' FROM tasks WHERE id=?';
+      $sel .= ' FROM tasks WHERE id=? AND tenant_id=?';
 
       $tq = $pdo->prepare($sel);
-      $tq->execute([$id]);
+      $tq->execute([$id, $tenant_id]);
       $task = $tq->fetch();
       $task['checked']  = (int)$task['checked'];
       $task['priority'] = (int)$task['priority'];
@@ -173,7 +178,8 @@ try {
       if ($hasStart)    { $fields[]='start_date=?'; $vals[]=$start; }
       if ($hasDue)      { $fields[]='due_date=?';   $vals[]=$due; }
       $vals[] = $id; $vals[] = $list_id;
-      $st = $pdo->prepare('UPDATE tasks SET '.implode(',', $fields).' WHERE id=? AND list_id=?');
+      $st = $pdo->prepare('UPDATE tasks SET '.implode(',', $fields).' WHERE id=? AND list_id=? AND tenant_id=?');
+      $vals[] = $tenant_id;
       $st->execute($vals);
       j(['ok'=>true]);
     }
@@ -182,15 +188,15 @@ try {
       require_method('POST');
       $b = json_decode(file_get_contents('php://input'), true) ?: [];
       $id = (int)($b['id'] ?? 0);
-      $pdo->prepare('DELETE FROM tasks WHERE id=? AND list_id=?')->execute([$id,$list_id]);
+      $pdo->prepare('DELETE FROM tasks WHERE id=? AND list_id=? AND tenant_id=?')->execute([$id,$list_id,$tenant_id]);
       j(['ok'=>true]);
     }
 
     case 'update_meta': { // POST
       require_method('POST');
       $b = json_decode(file_get_contents('php://input'), true) ?: [];
-      $pdo->prepare('UPDATE lists SET date_label=?, owner=?, phone=?, notes=?, materials=? WHERE id=?')
-          ->execute([(string)($b['date_label'] ?? ''),(string)($b['owner'] ?? ''),(string)($b['phone'] ?? ''),(string)($b['notes'] ?? ''),(string)($b['materials'] ?? ''),$list_id]);
+      $pdo->prepare('UPDATE lists SET date_label=?, owner=?, phone=?, notes=?, materials=? WHERE id=? AND tenant_id=?')
+          ->execute([(string)($b['date_label'] ?? ''),(string)($b['owner'] ?? ''),(string)($b['phone'] ?? ''),(string)($b['notes'] ?? ''),(string)($b['materials'] ?? ''),$list_id,$tenant_id]);
       j(['ok'=>true]);
     }
 
@@ -202,14 +208,14 @@ try {
       $dates = isset($b['dates']) && is_array($b['dates']) ? $b['dates'] : [];
 
       $pdo->beginTransaction();
-      $pos = 1; $st = $pdo->prepare('UPDATE tasks SET position=? WHERE id=? AND list_id=?');
-      $stDate = ($hasStart || $hasDue) ? $pdo->prepare('UPDATE tasks SET start_date=?, due_date=? WHERE id=? AND list_id=?') : null;
+      $pos = 1; $st = $pdo->prepare('UPDATE tasks SET position=? WHERE id=? AND list_id=? AND tenant_id=?');
+      $stDate = ($hasStart || $hasDue) ? $pdo->prepare('UPDATE tasks SET start_date=?, due_date=? WHERE id=? AND list_id=? AND tenant_id=?') : null;
       foreach ($ids as $id) {
-        $st->execute([$pos++, $id, $list_id]);
+        $st->execute([$pos++, $id, $list_id, $tenant_id]);
         if ($stDate && isset($dates[$id])) {
           $sd = norm_dt($dates[$id]['start_date'] ?? null);
           $dd = norm_dt($dates[$id]['due_date']   ?? null);
-          $stDate->execute([$sd, $dd, $id, $list_id]);
+          $stDate->execute([$sd, $dd, $id, $list_id, $tenant_id]);
         }
       }
       $pdo->commit();
@@ -219,8 +225,8 @@ try {
     case 'reset': { // POST – μηδενίζει όλα τα checked και κρατά την #4 αν υπάρχει
       require_method('POST');
       $pdo->beginTransaction();
-      $pdo->prepare('UPDATE tasks SET checked=0 WHERE list_id=?')->execute([$list_id]);
-      $pdo->prepare('UPDATE tasks SET checked=1 WHERE list_id=? AND position=4')->execute([$list_id]);
+      $pdo->prepare('UPDATE tasks SET checked=0 WHERE list_id=? AND tenant_id=?')->execute([$list_id, $tenant_id]);
+      $pdo->prepare('UPDATE tasks SET checked=1 WHERE list_id=? AND tenant_id=? AND position=4')->execute([$list_id, $tenant_id]);
       $pdo->commit();
       j(['ok'=>true]);
     }
@@ -228,8 +234,8 @@ try {
     case 'wipe': { // POST – διαγράφει όλες τις εργασίες και μεταδεδομένα
       require_method('POST');
       $pdo->beginTransaction();
-      $pdo->prepare('DELETE FROM tasks WHERE list_id=?')->execute([$list_id]);
-      $pdo->prepare('UPDATE lists SET date_label=NULL, owner=NULL, phone=NULL, notes=NULL, materials=NULL WHERE id=?')->execute([$list_id]);
+      $pdo->prepare('DELETE FROM tasks WHERE list_id=? AND tenant_id=?')->execute([$list_id, $tenant_id]);
+      $pdo->prepare('UPDATE lists SET date_label=NULL, owner=NULL, phone=NULL, notes=NULL, materials=NULL WHERE id=? AND tenant_id=?')->execute([$list_id, $tenant_id]);
       $pdo->commit();
       j(['ok'=>true]);
     }
@@ -242,12 +248,12 @@ try {
       if ($task_id<=0) j(['ok'=>false,'error'=>'task_id required'],400);
 
       // να ανήκει στη λίστα
-      $chk = $pdo->prepare('SELECT 1 FROM tasks WHERE id=? AND list_id=?');
-      $chk->execute([$task_id,$list_id]);
+      $chk = $pdo->prepare('SELECT 1 FROM tasks WHERE id=? AND list_id=? AND tenant_id=?');
+      $chk->execute([$task_id,$list_id,$tenant_id]);
       if (!$chk->fetch()) j(['ok'=>false,'error'=>'Not found'],404);
 
-      $q = $pdo->prepare("SELECT id, body, author, DATE_FORMAT(created_at,'%d/%m/%Y %H:%i') AS created_at_fmt FROM task_notes WHERE task_id=? ORDER BY id DESC");
-      $q->execute([$task_id]);
+      $q = $pdo->prepare("SELECT tn.id, tn.body, tn.author, DATE_FORMAT(tn.created_at,'%d/%m/%Y %H:%i') AS created_at_fmt FROM task_notes tn JOIN tasks t ON t.id=tn.task_id WHERE tn.task_id=? AND t.tenant_id=? ORDER BY tn.id DESC");
+      $q->execute([$task_id, $tenant_id]);
       j(['ok'=>true,'notes'=>$q->fetchAll()]);
     }
 
@@ -259,16 +265,16 @@ try {
       $body    = trim((string)($b['body'] ?? ''));
       if ($task_id<=0 || $body==='') j(['ok'=>false,'error'=>'Invalid data'],400);
 
-      $chk = $pdo->prepare('SELECT 1 FROM tasks WHERE id=? AND list_id=?');
-      $chk->execute([$task_id,$list_id]);
+      $chk = $pdo->prepare('SELECT 1 FROM tasks WHERE id=? AND list_id=? AND tenant_id=?');
+      $chk->execute([$task_id,$list_id,$tenant_id]);
       if (!$chk->fetch()) j(['ok'=>false,'error'=>'Not found'],404);
 
       $st = $pdo->prepare('INSERT INTO task_notes(task_id, body, author) VALUES (?,?,?)');
       $st->execute([$task_id,$body,null]);
 
       $id = (int)$pdo->lastInsertId();
-      $q  = $pdo->prepare("SELECT id, body, author, DATE_FORMAT(created_at,'%d/%m/%Y %H:%i') AS created_at_fmt FROM task_notes WHERE id=?");
-      $q->execute([$id]); $note = $q->fetch();
+      $q  = $pdo->prepare("SELECT tn.id, tn.body, tn.author, DATE_FORMAT(tn.created_at,'%d/%m/%Y %H:%i') AS created_at_fmt FROM task_notes tn JOIN tasks t ON t.id=tn.task_id WHERE tn.id=? AND t.tenant_id=?");
+      $q->execute([$id, $tenant_id]); $note = $q->fetch();
       j(['ok'=>true,'note'=>$note]);
     }
 
@@ -279,8 +285,8 @@ try {
       $id = (int)($b['id'] ?? 0);
       if ($id<=0) j(['ok'=>false,'error'=>'Invalid id'],400);
 
-      $st = $pdo->prepare("DELETE task_notes FROM task_notes JOIN tasks ON tasks.id=task_notes.task_id WHERE task_notes.id=? AND tasks.list_id=?");
-      $st->execute([$id,$list_id]);
+      $st = $pdo->prepare("DELETE task_notes FROM task_notes JOIN tasks ON tasks.id=task_notes.task_id WHERE task_notes.id=? AND tasks.list_id=? AND tasks.tenant_id=?");
+      $st->execute([$id,$list_id,$tenant_id]);
       j(['ok'=>true]);
     }
 

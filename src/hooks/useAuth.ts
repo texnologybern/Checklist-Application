@@ -20,6 +20,10 @@ export const useAuth = (service: AuthService): UseAuthResult => {
   const mountedRef = useRef(true);
 
   useEffect(() => {
+    setState({ status: 'idle', session: null, error: null });
+  }, [service]);
+
+  useEffect(() => {
     mountedRef.current = true;
     service
       .getSession()

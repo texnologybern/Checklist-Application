@@ -50,3 +50,47 @@ export class LocalLayoutService implements LayoutService {
     this.storage.removeItem(LAYOUT_KEY);
   }
 }
+
+export class ApiLayoutService implements LayoutService {
+  private readonly baseUrl: string;
+
+  constructor(baseUrl = '/saas_api.php') {
+    this.baseUrl = baseUrl;
+  }
+
+  async load(): Promise<BoardCard[] | null> {
+    const res = await fetch(`${this.baseUrl}?action=layout_load`, { credentials: 'include' });
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      throw new Error(data?.error || 'Unable to load layout');
+    }
+
+    return data.layout as BoardCard[] | null;
+  }
+
+  async save(cards: BoardCard[]): Promise<void> {
+    const res = await fetch(`${this.baseUrl}?action=layout_save`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ layout: cards })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      throw new Error(data?.error || 'Unable to save layout');
+    }
+  }
+
+  async clear(): Promise<void> {
+    const res = await fetch(`${this.baseUrl}?action=layout_clear`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      throw new Error(data?.error || 'Unable to clear layout');
+    }
+  }
+}

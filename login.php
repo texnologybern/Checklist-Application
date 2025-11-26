@@ -12,7 +12,7 @@ if (is_authed($list_id)) {
 
 // Έλεγξε αν υπάρχει ήδη ορισμένος κωδικός
 $pdo = DB::conn();
-$st = $pdo->prepare('SELECT name, access_hash FROM lists WHERE id = ?');
+$st = $pdo->prepare('SELECT name, access_hash, tenant_id FROM lists WHERE id = ?');
 $st->execute([$list_id]);
 $row = $st->fetch();
 $list_name = $row['name'] ?? 'Λίστα';
@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $pass = (string)($_POST['password'] ?? '');
       if ($pass !== '' && verify_password($list_id, $pass)) {
         $_SESSION['auth_lists'][$list_id] = true;
+        $_SESSION['tenant_id'] = (int)($row['tenant_id'] ?? 1);
         header('Location: index.php?list_id=' . $list_id);
         exit;
       } else {

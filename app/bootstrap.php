@@ -10,6 +10,7 @@ $cfg = require __DIR__ . '/Config/config.php';
 
 session_start();
 require_once __DIR__ . '/Lib/DB.php';
+require_once __DIR__ . '/Lib/Tenancy.php';
 
 function ensure_migrated(): void {
   $pdo = DB::conn();
@@ -27,6 +28,10 @@ function ensure_migrated(): void {
   ensure_task_notes($pdo);
   // 005 - start/due dates
   ensure_task_dates($pdo);
+  // 006 - multi-tenant scaffolding
+  ensure_tenancy_schema($pdo);
+  ensure_default_roles($pdo);
+  ensure_default_tenant($pdo);
 }
 
 function ensure_task_notes(PDO $pdo): void {
@@ -92,7 +97,12 @@ function require_csrf(): void {
 /* ========= AUTH ========= */
 function is_authed(int $list_id = 1): bool { return !empty($_SESSION['auth_lists'][$list_id]); }
 function require_auth(int $list_id = 1): void {
-  if (is_authed($list_id)) return;
+  if (is_authed($list_id)) {
+    // bind the legacy session to the tenant owning this list
+    $pdo = DB::conn();
+    $_SESSION['tenant_id'] = list_tenant_id($pdo, $list_id);
+    return;
+  }
   if (basename($_SERVER['SCRIPT_NAME']) === 'api.php') {
     http_response_code(401); header('Content-Type: application/json; charset=UTF-8');
     echo json_encode(['ok'=>false,'error'=>'Unauthorized']); exit;
